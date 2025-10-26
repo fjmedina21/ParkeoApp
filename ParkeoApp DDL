@@ -1,0 +1,159 @@
+alter database railway rename to ParkeoApp;
+
+
+-- Habilitar extensión para UUIDs
+CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
+
+-- ==============================
+-- 1. Tenants
+-- ==============================
+CREATE TABLE tenants (
+	tenant_id UUID PRIMARY KEY DEFAULT uuid_generate_v4 (),
+	name VARCHAR(200) NOT NULL,
+	is_active BOOLEAN NOT NULL DEFAULT TRUE,
+	created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
+	updated_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
+	deleted_at TIMESTAMP WITH TIME ZONE
+);
+
+CREATE INDEX idx_tenants_name ON tenants (name);
+
+-- ==============================
+-- 2. Users
+-- ==============================
+CREATE TABLE users (
+	user_id UUID PRIMARY KEY DEFAULT uuid_generate_v4 (),
+	tenant_id UUID NOT NULL REFERENCES tenants (tenant_id) ON DELETE CASCADE,
+	firts_name VARCHAR(200),
+	last_name VARCHAR(200),
+	email VARCHAR(256) NOT NULL,
+	password_hash VARCHAR(500),
+	profile_picture_url TEXT,
+	is_active BOOLEAN NOT NULL DEFAULT TRUE,
+	created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
+	updated_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
+	deleted_at TIMESTAMP WITH TIME ZONE,
+	last_login TIMESTAMP WITH TIME ZONE,
+	CONSTRAINT ux_users_tenant_email UNIQUE (tenant_id, email)
+);
+
+-- ==============================
+-- Users Tokens (Access + Refresh)
+-- ==============================
+CREATE TABLE users_tokens (
+	token_id UUID PRIMARY KEY DEFAULT uuid_generate_v4 (),
+	tenant_id UUID NOT NULL REFERENCES tenants (tenant_id) ON DELETE CASCADE,
+	user_id UUID NOT NULL REFERENCES users (user_id) ON DELETE CASCADE,
+	access_token VARCHAR(500) NOT NULL,
+	access_expires_at TIMESTAMP WITH TIME ZONE NOT NULL,
+	refresh_token VARCHAR(500) NOT NULL,
+	refresh_expires_at TIMESTAMP WITH TIME ZONE NOT NULL,
+	created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
+	revoked_at TIMESTAMP WITH TIME ZONE,
+	is_active BOOLEAN NOT NULL DEFAULT TRUE
+);
+
+-- Indexes
+CREATE INDEX idx_users_tokens_user ON users_tokens (user_id);
+CREATE INDEX idx_users_tokens_tenant ON users_tokens (tenant_id);
+CREATE INDEX idx_users_tokens_user_active ON users_tokens (user_id, is_active);
+
+-- ==============================
+-- 3. Roles
+-- ==============================
+CREATE TABLE roles (
+	role_id UUID PRIMARY KEY DEFAULT uuid_generate_v4 (),
+	tenant_id UUID NOT NULL REFERENCES tenants (tenant_id) ON DELETE CASCADE,
+	name VARCHAR(100) NOT NULL,
+	is_active BOOLEAN NOT NULL DEFAULT TRUE,
+	created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
+	updated_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
+	deleted_at TIMESTAMP WITH TIME ZONE,
+	CONSTRAINT ux_roles_tenant_name UNIQUE (tenant_id, name)
+);
+
+-- ==============================
+-- 4. UserRoles
+-- ==============================
+CREATE TABLE user_roles (
+	user_role_id UUID PRIMARY KEY DEFAULT uuid_generate_v4 (),
+	user_id UUID NOT NULL REFERENCES users (user_id) ON DELETE CASCADE,
+	role_id UUID NOT NULL REFERENCES roles (role_id) ON DELETE CASCADE,
+	assigned_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+-- ==============================
+-- 5. Parking Lots
+-- ==============================
+CREATE TABLE parking_lots (
+	parking_lot_id UUID PRIMARY KEY DEFAULT uuid_generate_v4 (),
+	tenant_id UUID NOT NULL REFERENCES tenants (tenant_id) ON DELETE CASCADE,
+	name VARCHAR(200) NOT NULL,
+	description TEXT,
+	address VARCHAR(300),
+	latitude NUMERIC(9, 6),
+	longitude NUMERIC(9, 6),
+	is_active BOOLEAN NOT NULL DEFAULT TRUE,
+	created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
+	updated_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
+	deleted_at TIMESTAMP WITH TIME ZONE
+);
+
+CREATE INDEX idx_parking_lots_tenant ON parking_lots (tenant_id);
+
+-- ==============================
+-- 6. Parking Spots
+-- ==============================
+CREATE TABLE parking_spots (
+	spot_id UUID PRIMARY KEY DEFAULT uuid_generate_v4 (),
+	tenant_id UUID NOT NULL REFERENCES tenants (tenant_id) ON DELETE CASCADE,
+	parking_lot_id UUID NOT NULL REFERENCES parking_lots (parking_lot_id) ON DELETE CASCADE,
+	code VARCHAR(50) NOT NULL,
+	spotType VARCHAR(50) DEFAULT 'STANDARD', -- STANDARD, COMPACT, EV, MOTORCYCLE
+	status VARCHAR(50) NOT NULL, -- AVAILABLE, OCCUPIED, RESERVED, MAINTENANCE
+	FLOOR INT DEFAULT 0,
+	note TEXT,
+	is_active BOOLEAN NOT NULL DEFAULT TRUE,
+	created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
+	updated_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
+	deleted_at TIMESTAMP WITH TIME ZONE,
+	CONSTRAINT ux_spots_lot_code UNIQUE (parking_lot_id, code)
+);
+
+-- ==============================
+-- 8. Reservations
+-- ==============================
+CREATE TABLE reservations (
+	reservation_id UUID PRIMARY KEY DEFAULT uuid_generate_v4 (),
+	tenant_id UUID NOT NULL REFERENCES tenants (tenant_id) ON DELETE CASCADE,
+	user_id UUID NOT NULL REFERENCES users (user_id) ON DELETE CASCADE,
+	spot_id UUID REFERENCES parking_spots (spot_id) ON DELETE SET NULL,
+	code VARCHAR(100) NOT NULL,
+	start_at TIMESTAMP WITH TIME ZONE NOT NULL,
+	end_at TIMESTAMP WITH TIME ZONE NOT NULL,
+	status VARCHAR(50) NOT NULL DEFAULT 'RESERVED', -- RESERVED, ACTIVE, COMPLETED, CANCELLED
+	note TEXT,
+	is_active BOOLEAN NOT NULL DEFAULT TRUE,
+	created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
+	updated_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
+	deleted_at TIMESTAMP WITH TIME ZONE,
+	CONSTRAINT ux_reservations_tenant_code UNIQUE (tenant_id, code)
+);
+
+-- ==============================
+-- 9. Payments
+-- ==============================
+CREATE TABLE payments (
+	payment_id UUID PRIMARY KEY DEFAULT uuid_generate_v4 (),
+	tenant_id UUID NOT NULL REFERENCES tenants (tenant_id) ON DELETE CASCADE,
+	reservation_id UUID REFERENCES reservations (reservation_id) ON DELETE SET NULL,
+	amount NUMERIC(12, 2) NOT NULL,
+	currency VARCHAR(10) NOT NULL,
+	payment_method VARCHAR(50),
+	status VARCHAR(50) NOT NULL DEFAULT 'PENDING', -- PENDING, COMPLETED, FAILED
+	transaction_id VARCHAR(100),
+	created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
+	updated_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE INDEX idx_payments_tenant_status ON payments (tenant_id, status);

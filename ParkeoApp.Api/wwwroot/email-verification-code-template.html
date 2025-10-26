@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Código de Verificación - ISFODOSU</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f4f6f9;
+            padding: 30px;
+            color: #333;
+        }
+
+        .card {
+            background-color: #ffffff;
+            max-width: 600px;
+            margin: auto;
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            padding: 30px;
+        }
+
+        .header {
+            font-size: 1.5em;
+            color: #004488;
+            margin-bottom: 10px;
+        }
+
+        .subheader {
+            font-size: 1.1em;
+            margin-bottom: 20px;
+            color: #666;
+        }
+
+        .code-box {
+            font-size: 2em;
+            background-color: #eef4ff;
+            padding: 20px;
+            text-align: center;
+            border-radius: 8px;
+            letter-spacing: 6px;
+            color: #004488;
+            font-weight: bold;
+            margin: 30px 0;
+        }
+
+        .content p {
+            line-height: 1.6;
+            margin-bottom: 15px;
+        }
+
+        .footer {
+            margin-top: 30px;
+            font-size: 0.9em;
+            color: #888;
+        }
+    </style>
+</head>
+<body>
+<div class="card">
+    <div class="header">Código de Verificación</div>
+    <div class="subheader">Verificación de correo electrónico</div>
+    <div class="content">
+        <p>Para continuar con la verificación de su correo electrónico, utilice el siguiente código. Este código es
+            temporal y tiene una validez limitada: {{code}}</p>
+        <div class="code-box">{{code}}</div>
+        <p>Si usted no solicitó este código, puede ignorar este mensaje de forma segura.</p>
+    </div>
+    <div class="footer">Este mensaje ha sido generado automáticamente. No responda a este correo.</div>
+</div>
+</body>
+</html>
