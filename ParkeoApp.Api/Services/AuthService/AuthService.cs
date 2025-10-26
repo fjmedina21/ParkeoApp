@@ -9,7 +9,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace ParkeoApp.Api.Services.AuthService
 {
-	public class AuthService(ParkeoAppContext dbContext, IMapper mapper, IConfiguration configuration) : IAuthService
+	public class AuthService(ParkeoAppContext dbContext, IMapper mapper, IConfiguration configuration, ILogger<AuthService> logger) : IAuthService
 	{
 		public async Task<ApiResponse<GetUser>> LoginAsync(CredentialsDto credentials, HttpContext httpContext)
 		{
@@ -64,6 +64,13 @@ namespace ParkeoApp.Api.Services.AuthService
 			await dbContext.SaveChangesAsync();
 
 			return new ApiResponse(message: "Password changed successfully.");
+		}
+
+		public async Task<ApiResponse> ForgotPasswordAsync(ForgotPasswordDto model)
+		{
+            logger.LogInformation("Forgot password called");
+
+			return new ApiResponse(message: $"check your email {model.Email} for further instructions");
 		}
 
 		private async Task<string> HandleTokenGenerationAndStorage(HttpContext httpContext, user user)

@@ -45,5 +45,16 @@ namespace ParkeoApp.Api.Controllers
             ApiResponse response = await authService.ChangePasswordAsync(model, token);
             return StatusCode(response.StatusCode, response);
         }
+
+        [HttpPost("forgot-password")]
+        [AllowAnonymous]
+        [ProducesResponseType<ApiResponse>(StatusCodes.Status200OK)]
+        [ProducesResponseType<ApiResponse>(StatusCodes.Status400BadRequest)]
+        public async Task<IActionResult> ForgotPassword([FromBody] ForgotPasswordDto model)
+        {
+            string token = Request.Headers["Authorization"]!;
+            ApiResponse response = await authService.ForgotPasswordAsync(model);
+            return StatusCode(response.StatusCode, response);
+        }
     }
 }
