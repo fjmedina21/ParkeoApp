@@ -8,25 +8,8 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="AutoMapper" Version="15.0.1" />
-        <PackageReference Include="BCrypt.Net-Next" Version="4.0.3" />
-        <PackageReference Include="MailKit" Version="4.14.1" />
         <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="9.0.10" />
         <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="9.0.9"/>
-        <PackageReference Include="Microsoft.EntityFrameworkCore" Version="9.0.10" />
-        <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="9.0.10">
-          <PrivateAssets>all</PrivateAssets>
-          <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-        </PackageReference>
-        <PackageReference Include="Microsoft.EntityFrameworkCore.InMemory" Version="9.0.10" />
-        <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="9.0.10" />
-        <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="9.0.10">
-          <PrivateAssets>all</PrivateAssets>
-          <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-        </PackageReference>
-        <PackageReference Include="Newtonsoft.Json" Version="13.0.4" />
-        <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="9.0.4" />
-        <PackageReference Include="Serilog.AspNetCore" Version="9.0.0" />
         <PackageReference Include="Swashbuckle.AspNetCore" Version="9.0.6" />
     </ItemGroup>
 
@@ -38,6 +21,11 @@
       <Content Include="..\.dockerignore">
         <Link>.dockerignore</Link>
       </Content>
+    </ItemGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\ParkeoApp.Application\ParkeoApp.Application.csproj" />
+      <ProjectReference Include="..\ParkeoApp.Domain\ParkeoApp.Domain.csproj" />
     </ItemGroup>
 
 </Project>

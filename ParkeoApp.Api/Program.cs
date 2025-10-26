@@ -1,13 +1,13 @@
 using System.Text.Json.Serialization;
-using ParkeoApp.Api.Data;
-using ParkeoApp.Api.Helpers;
-using ParkeoApp.Api.Middlewares;
-using ParkeoApp.Api.Models.DTO;
-using ParkeoApp.Api.Services.AuthService;
-using ParkeoApp.Api.Services.TenantService;
+using ParkeoApp.Application;
+using ParkeoApp.Application.Helpers;
+using ParkeoApp.Application.Middlewares;
+using ParkeoApp.Application.Services.AuthService;
+using ParkeoApp.Application.Services.TenantService;
+using ParkeoApp.Domain.DTO;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
+using ParkeoApp.Api;
 using Serilog;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -17,14 +17,10 @@ builder.Host.UseSerilog((hostBuilderContext, loggerConfig) => loggerConfig.ReadF
 // Add services to the container.
 builder.Services.AddCors(options => options.AddDefaultPolicy(policy => policy.AllowAnyOrigin().AllowAnyHeader().AllowAnyMethod()));
 
-
 builder.Services.AddControllers().AddJsonOptions(options =>
 {
 	options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles;
-	//options.JsonSerializerOptions.DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull;
 });
-
-builder.Services.AddDbContext<ParkeoAppContext>(options => options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
 
 builder.Services.AddAuthentication(option =>
 {
@@ -58,15 +54,7 @@ builder.Services.AddSwaggerGen(option =>
 
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
-builder.Services.AddAutoMapper(cfg =>
-{
-	cfg.LicenseKey = builder.Configuration.GetValue<string>("AutomapperKey");
-	cfg.AddProfile<MappingProfiles>();
-});
-
-builder.Services.AddScoped<IAuthService, AuthService>();
-builder.Services.AddScoped<ITenantService, TenantService>();
-builder.Services.AddTransient<GlobalErrorHandler>();
+builder.Services.AddApplication(builder.Configuration);
 
 var app = builder.Build();
 
@@ -77,7 +65,6 @@ if (app.Environment.IsDevelopment())
 	app.UseSwagger();
 	app.UseSwaggerUI();
 }
-
 
 app.UseHttpsRedirection();
 app.UseGlobalErrorHandler();

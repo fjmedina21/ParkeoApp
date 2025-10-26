@@ -1,7 +1,7 @@
-using ParkeoApp.Api.Helpers.Pagination;
-using ParkeoApp.Api.Models.ApiResponses;
-using ParkeoApp.Api.Models.DTO;
-using ParkeoApp.Api.Services.TenantService;
+using ParkeoApp.Application.Helpers.Pagination;
+using ParkeoApp.Application.Services.TenantService;
+using ParkeoApp.Domain.ApiResponseModels;
+using ParkeoApp.Domain.DTO;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 

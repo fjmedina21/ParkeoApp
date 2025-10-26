@@ -1,15 +1,16 @@
-using ParkeoApp.Api.Models.ApiResponses;
-using ParkeoApp.Api.Models.DTO;
-using ParkeoApp.Api.Services.AuthService;
-using ParkeoApp.Api.Services.AuthService.DTO;
-using ParkeoApp.Api.Services.TenantService;
+using ParkeoApp.Application.Services.AuthService;
+using ParkeoApp.Application.Services.AuthService.DTO;
+using ParkeoApp.Domain.ApiResponseModels;
+using ParkeoApp.Domain.DTO;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using ParkeoApp.Api.FiltersAttribute;
 
 namespace ParkeoApp.Api.Controllers
 {
     [ApiController]
     [Authorize]
+    [ValidateModel]
     [Route("api/[controller]")]
     public class AuthController(IAuthService authService) : ControllerBase
     {
