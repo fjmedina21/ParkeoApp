@@ -16,15 +16,16 @@ namespace ParkeoApp.Application.Helpers
 	public static class Utils
 	{
 		#region JWT
-		public static string GenerateSessionJwtAsync(user entity, IConfiguration configuration)
+
+		public static string GenerateSessionJwtAsync(User entity, IConfiguration configuration)
 		{
 			var key = Encoding.UTF8.GetBytes(configuration["JWTSettings:key"]!);
 			var validHours = int.Parse(configuration["JWTSettings:expiresIn-hours"]!);
 
 			List<Claim> authClaims =
 			[
-				new Claim("userId", entity.user_id.ToString()),
-				new Claim("tenantId", entity.tenant_id.ToString()),
+				new Claim("userId", entity.UserId.ToString()),
+				new Claim("tenantId", entity.TenantId.ToString()),
 			];
 
 			var secretKey = new SymmetricSecurityKey(key);
@@ -35,14 +36,14 @@ namespace ParkeoApp.Application.Helpers
 			return handledToken;
 		}
 
-		public static string GenerateRefreshJwtAsync(user entity, IConfiguration configuration)
+		public static string GenerateRefreshJwtAsync(User entity, IConfiguration configuration)
 		{
 			var key = Encoding.UTF8.GetBytes(configuration["JWTSettings:key"]!);
 			var validHours = int.Parse(configuration["JWTSettings:expiresIn-refreshToken-hours"]!);
 
 			List<Claim> authClaims =
 			[
-				new Claim("userId", entity.user_id.ToString())
+				new Claim("userId", entity.UserId.ToString())
 			];
 
 			var secretKey = new SymmetricSecurityKey(key);
@@ -116,6 +117,7 @@ namespace ParkeoApp.Application.Helpers
 		#endregion
 
 		#region BCrypt
+
 		public static string HashText(string txt, int salt = 11)
 		{
 			return BC.EnhancedHashPassword(inputKey: txt, workFactor: salt);
@@ -128,6 +130,24 @@ namespace ParkeoApp.Application.Helpers
 
 		#endregion
 
+		public async static Task SendReservationCode(Reservation reservation, IConfiguration configuration)
+		{
+			Random rnd = new();
+			var randomNumberInRange = rnd.Next(100000, 999999).ToString();
+
+			reservation.Code = HashText(randomNumberInRange);
+
+			string templatePath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "send-code-by-email-template.html");
+			string htmlFile = await File.ReadAllTextAsync(templatePath);
+			const string subject = "Código de Reserva";
+			string htmlBody = htmlFile
+				.Replace("{{subject}}", subject)
+				.Replace("{{code}}", randomNumberInRange);
+
+			var mail = new EmailReq(To: [reservation.User.Email], Subject: subject, Body: htmlBody);
+			await SendEmailAsync(mail, configuration);
+		}
+
 		// public async static Task SendVerificationCode( User user ,IConfiguration configuration)
 		// {
 		// 	Random rnd = new();
@@ -137,11 +157,14 @@ namespace ParkeoApp.Application.Helpers
 		// 	user.VerificationCodeValidUntil = DateTime.UtcNow.AddMinutes(10);
 		// 	user.VerificationCodeUsed = false;
 		//
-		// 	string templatePath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "email-verification-code-template.html");
+		// 	string templatePath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "send-code-by-email-template.html");
 		// 	string htmlFile = await File.ReadAllTextAsync(templatePath);
-		// 	string htmlBody = htmlFile.Replace("{{code}}", randomNumberInRange);
+		// const string subject = "Código de Verificación";
+		// string htmlBody = htmlFile
+			// 	.Replace("{{subject}}", subject)
+			// 	.Replace("{{code}}", randomNumberInRange);
 		//
-		// 	var mail = new EmailReq(To: [user.Email], Subject: "Código de Verificación", Body: htmlBody);
+		// 	var mail = new EmailReq(To: [user.Email], Subject: subject, Body: htmlBody);
 		// 	await SendEmailAsync(mail, configuration);
 		// }
 

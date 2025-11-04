@@ -16,28 +16,27 @@ namespace ParkeoApp.Application.Services.AuthService
 	{
 		public async Task<ApiResponse<GetUser>> LoginAsync(CredentialsDto credentials, HttpContext httpContext)
 		{
-			user? user = await dbContext.users.AsNoTracking()
-				.Include(e => e.user_roles)
-				.Where(e => e.is_active)
-				.FirstOrDefaultAsync(e => e.email.Equals(credentials.Email));
+			User? user = await dbContext.Users.AsNoTracking()
+				.Include(e => e.UserRoles)
+				.Where(e => !e.DeletedAt.HasValue)
+				.FirstOrDefaultAsync(e => e.Email.Equals(credentials.Email));
 
-			if (user is null || !Utils.CompareText(credentials.Password, user.password_hash))
+			if (user is null || !Utils.CompareText(credentials.Password, user.PasswordHash))
 				return new ApiResponse<GetUser>(statusCode: StatusCodes.Status400BadRequest, message: "Invalid credentials. Please try again.");
 
-			var dto = mapper.Map<GetUser>(user);
+			GetUser? dto = mapper.Map<GetUser>(user);
 			await HandleTokenGenerationAndStorage(httpContext, user);
 			return new ApiResponse<GetUser>(data: [dto]);
 		}
 
 		public async Task<ApiResponse<GetUser>> SignupAsync(AddUser signup, HttpContext httpContext)
 		{
-			user newUser = mapper.Map<user>(signup);
+			User newUser = mapper.Map<User>(signup);
 
-			if (await Validations.EmailExist(signup.email, dbContext)) return new ApiResponse<GetUser>(statusCode: StatusCodes.Status400BadRequest, message: "Email already exists.");
+			if (await Validations.EmailExist(signup.Email, dbContext)) return new ApiResponse<GetUser>(statusCode: StatusCodes.Status400BadRequest, message: "Email already exists.");
 
-			newUser.password_hash = Utils.HashText(signup.password);
-			var entry = await dbContext.users.AddAsync(newUser);
-			entry.Entity.is_active = true;
+			newUser.PasswordHash = Utils.HashText(signup.Password);
+			var entry = await dbContext.Users.AddAsync(newUser);
 			await dbContext.SaveChangesAsync();
 
 			await HandleTokenGenerationAndStorage(httpContext, entry.Entity);
@@ -50,11 +49,11 @@ namespace ParkeoApp.Application.Services.AuthService
 		{
 			var payload = Utils.DecodeJwt(token);
 
-			user? user = await dbContext.users.Where(e => e.is_active)
-				.FirstOrDefaultAsync(e => e.user_id.Equals(payload.User));
+			User? user = await dbContext.Users.Where(e => !e.DeletedAt.HasValue)
+				.FirstOrDefaultAsync(e => e.UserId.Equals(payload.User));
 
-			bool currentPasswordMatch = Utils.CompareText(model.OldPassword, user!.password_hash);
-			bool newPasswordMatch = Utils.CompareText(model.NewPassword, user.password_hash);
+			bool currentPasswordMatch = Utils.CompareText(model.OldPassword, user!.PasswordHash);
+			bool newPasswordMatch = Utils.CompareText(model.NewPassword, user.PasswordHash);
 
 			if (!currentPasswordMatch)
 				return new ApiResponse(
@@ -63,7 +62,7 @@ namespace ParkeoApp.Application.Services.AuthService
 				return new ApiResponse(
 					statusCode: StatusCodes.Status400BadRequest, message: "Try a password different than the current one.");
 
-			user.password_hash = Utils.HashText(model.NewPassword);
+			user.PasswordHash = Utils.HashText(model.NewPassword);
 			await dbContext.SaveChangesAsync();
 
 			return new ApiResponse(message: "Password changed successfully.");
@@ -71,25 +70,47 @@ namespace ParkeoApp.Application.Services.AuthService
 
 		public async Task<ApiResponse> ForgotPasswordAsync(ForgotPasswordDto model)
 		{
-            logger.LogInformation("Forgot password called");
+			User? user = await dbContext.Users
+				.Where(e => !e.DeletedAt.HasValue)
+				.FirstOrDefaultAsync(e => e.Email.Equals(model.Email));
+
+			if (user is null) return new ApiResponse(statusCode: StatusCodes.Status400BadRequest, message: "Email not found.");
+
+			// set a temporary password
+			Random rnd = new();
+			var randomNumberInRange = rnd.Next(100000, 999999).ToString();
+
+			user.PasswordHash = Utils.HashText(randomNumberInRange);
+			await dbContext.SaveChangesAsync();
+
+			// send email
+			string templatePath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "send-code-by-email-template.html");
+			string htmlFile = await File.ReadAllTextAsync(templatePath);
+			const string subject = "Forgot Password - New Password";
+			string htmlBody = htmlFile
+				.Replace("{{subject}}", subject)
+				.Replace("{{code}}", randomNumberInRange);
+
+			var mail = new EmailReq(To: [user.Email], Subject: subject, Body: htmlBody);
+			await Utils.SendEmailAsync(mail, configuration);
 
 			return new ApiResponse(message: $"check your email {model.Email} for further instructions");
 		}
 
-		private async Task<string> HandleTokenGenerationAndStorage(HttpContext httpContext, user user)
+		private async Task<string> HandleTokenGenerationAndStorage(HttpContext httpContext, User user)
 		{
 			string sessionJwtAsync = Utils.GenerateSessionJwtAsync(user, configuration);
 			string refreshJwtAsync = Utils.GenerateRefreshJwtAsync(user, configuration);
 			httpContext.Response.Headers["jwt"] = sessionJwtAsync;
 			httpContext.Response.Headers["refresh-jwt"] = refreshJwtAsync;
-			await dbContext.users_tokens.AddAsync(new users_token()
+			await dbContext.UsersTokens.AddAsync(new UsersToken()
 			{
-				tenant_id = user.tenant_id,
-				user_id = user.user_id,
-				access_token = sessionJwtAsync,
-				refresh_token = refreshJwtAsync,
-				access_expires_at = Utils.DecodeJwt(sessionJwtAsync).ExpiresIn,
-				refresh_expires_at =Utils.DecodeRefreshJwt(sessionJwtAsync).ExpiresIn,
+				TenantId = user.TenantId,
+				UserId = user.UserId,
+				AccessToken = sessionJwtAsync,
+				RefreshToken = refreshJwtAsync,
+				AccessExpiresAt = Utils.DecodeJwt(sessionJwtAsync).ExpiresIn,
+				RefreshExpiresAt = Utils.DecodeRefreshJwt(sessionJwtAsync).ExpiresIn,
 			});
 			await dbContext.SaveChangesAsync();
 			return sessionJwtAsync;

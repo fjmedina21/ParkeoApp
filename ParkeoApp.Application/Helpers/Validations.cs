@@ -25,7 +25,7 @@ namespace ParkeoApp.Application.Helpers
 
         public async static Task<bool> EmailExist(string email, ParkeoAppContext context)
         {
-            return await context.users.AnyAsync(e => e.email == email);
+            return await context.Users.AnyAsync(e => e.Email == email);
         }
 
 

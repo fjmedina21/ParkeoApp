@@ -2,10 +2,10 @@ namespace ParkeoApp.Domain.DTO
 {
 	public class GetTenant
 	{
-		public Guid tenant_id { get; set; }
-		public string name { get; set; } = null!;
-		public string domain { get; set; } = null!;
+		public Guid TenantId { get; set; }
+		public string Name { get; set; } = null!;
+		public string Domain { get; set; } = null!;
 	}
 
-	public record AddTenant(string name, string domain);
+	public record AddTenant(string Name, string Domain);
 }

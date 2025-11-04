@@ -1,10 +1,6 @@
 using System.Text.Json.Serialization;
 using ParkeoApp.Application;
-using ParkeoApp.Application.Helpers;
 using ParkeoApp.Application.Middlewares;
-using ParkeoApp.Application.Services.AuthService;
-using ParkeoApp.Application.Services.TenantService;
-using ParkeoApp.Domain.DTO;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.OpenApi.Models;
 using ParkeoApp.Api;

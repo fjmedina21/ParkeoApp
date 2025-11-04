@@ -8,11 +8,32 @@ namespace ParkeoApp.Application
 	{
 		public AutoMappingProfiles()
 		{
-			CreateMap<user, GetUser>();
-			CreateMap<AddUser, user>();
+			CreateMap<User, GetUser>();
+			CreateMap<User, GetUserWNRef>();
+			CreateMap<AddUser, User>();
 
-			CreateMap<tenant, GetTenant>();
-			CreateMap<AddTenant, tenant>();
+			CreateMap<Tenant, GetTenant>();
+			CreateMap<AddTenant, Tenant>();
+
+			CreateMap<Reservation, GetReservation>();
+			CreateMap<Reservation, GetReservationWNRef>();
+			CreateMap<AddReservation, Reservation>();
+
+			CreateMap<ParkingLot, GetParkingLot>();
+			CreateMap<ParkingLot, GetParkingLotWNRef>();
+			CreateMap<AddParkingLot, ParkingLot>();
+
+			CreateMap<ParkingSpot, GetParkingSpot>();
+			CreateMap<ParkingSpot, GetParkingSpotWNRef>();
+			CreateMap<AddParkingSpot, ParkingSpot>();
+
+			CreateMap<Role, GetRole>();
+			CreateMap<AddRole, Role>();
+
+			CreateMap<Permission, GetPermission>();
+			CreateMap<AddPermission, Permission>();
+
+
 		}
 	}
 }

@@ -12,41 +12,42 @@ namespace ParkeoApp.Application.Services.TenantService
 {
 	public class TenantService(ParkeoAppContext dbContext, IMapper mapper) : ITenantService
 	{
-		private IQueryable<tenant> LoadData(Guid tenant) => dbContext.tenants.Where(e => e.is_active && e.tenant_id == tenant)
-		.AsQueryable();
+		private IQueryable<Tenant> LoadData() => dbContext.Tenants
+			.Where(e => !e.DeletedAt.HasValue)
+			.AsQueryable();
 
-		public async Task<ApiResponse<GetTenant>> GetAllAsync(PaginationParams paginationParams, string jwt)
+		public async Task<ApiResponse<GetTenant>> GetAllAsync(PaginationParams paginationParams)
 		{
-			var tokenPayload = Utils.DecodeJwt(jwt);
-			var data =await LoadData(tokenPayload.Tenant).ToListAsync();
+			var data =await LoadData().ToListAsync();
 			var dto = mapper.Map<ICollection<GetTenant>>(data);
 
 			var pagedItem = PagedList<GetTenant>.ToPagedList(dto,paginationParams.CurrentPage,paginationParams.PageSize);
 			return new ApiResponse<GetTenant>(data: pagedItem);
 		}
 
-		public async Task<ApiResponse<GetTenant>> GetByIdAsync(string uid, string jwt)
+		public Task<ApiResponse<GetTenant>> GetAllAsync(PaginationParams paginationParams, string jwt) => throw new NotImplementedException();
+
+		public async Task<ApiResponse<GetTenant>> GetByIdAsync(Guid uid, string jwt)
 		{
-			var tokenPayload = Utils.DecodeJwt(jwt);
-			var data =  await LoadData(tokenPayload.Tenant).FirstOrDefaultAsync(e =>e.tenant_id.Equals(uid));
+			TokenPayload tokenPayload = Utils.DecodeJwt(jwt);
+			Tenant? data =  await LoadData().FirstOrDefaultAsync(e =>e.TenantId.Equals(uid));
 			if (data is null) return new ApiResponse<GetTenant>(StatusCodes.Status400BadRequest);
-			var dto = mapper.Map<GetTenant>(data);
+			GetTenant? dto = mapper.Map<GetTenant>(data);
 			return new ApiResponse<GetTenant>(data: [dto]);
 		}
 
 		public async Task<ApiResponse<GetTenant>> CreateAsync(AddTenant model, string jwt)
 		{
-			var tokenPayload = Utils.DecodeJwt(jwt);
-			tenant newTenant = mapper.Map<tenant>(model);
+			TokenPayload tokenPayload = Utils.DecodeJwt(jwt);
+			Tenant newTenant = mapper.Map<Tenant>(model);
 
-			newTenant.is_active = true;
-			var entry = await dbContext.tenants.AddAsync(newTenant);
+			var entry = await dbContext.Tenants.AddAsync(newTenant);
 			await dbContext.SaveChangesAsync();
 
-			var dto = mapper.Map<GetTenant>(entry.Entity);
+			GetTenant? dto = mapper.Map<GetTenant>(entry.Entity);
 			return new ApiResponse<GetTenant>(StatusCodes.Status201Created,data: [dto]);
 		}
-		public async Task<ApiResponse<GetTenant>> UpdateAsync(string uid, AddTenant model, string jwt) => throw new NotImplementedException();
-		public async Task<ApiResponse<GetTenant>> DeleteAsync(string uid, string jwt) => throw new NotImplementedException();
+		public async Task<ApiResponse> UpdateAsync(Guid uid, AddTenant model, string jwt) => throw new NotImplementedException();
+		public async Task<ApiResponse> DeleteAsync(Guid uid, string jwt) => throw new NotImplementedException();
 	}
 }
