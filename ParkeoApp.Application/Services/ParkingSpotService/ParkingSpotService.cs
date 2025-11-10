@@ -14,7 +14,6 @@ namespace ParkeoApp.Application.Services.ParkingSpotService
 	{
 		private IQueryable<ParkingSpot> LoadData(Guid tenantId) => dbContext.ParkingSpots
 			.Where(e => !e.DeletedAt.HasValue && e.TenantId.Equals(tenantId))
-			.Include(e => e.ParkingLot)
 			.Include(e => e.Reservations.OrderByDescending(e=>e.CreatedAt))
 			.OrderByDescending(e => e.UpdatedAt).ThenByDescending(e => e.CreatedAt)
 			.AsQueryable();
@@ -22,14 +21,15 @@ namespace ParkeoApp.Application.Services.ParkingSpotService
 		public async Task<ApiResponse<GetParkingSpot>> GetByParkingLotAsync(Guid parkingLotId, PaginationParams paginationParams, string jwt)
 		{
 			TokenPayload tokenPayload = Utils.DecodeJwt(jwt);
-			var data =await LoadData(tokenPayload.Tenant).ToListAsync();
+			var data =await LoadData(tokenPayload.Tenant).Where(e=>e.ParkingLotId.Equals(parkingLotId)).ToListAsync();
 			var dto = mapper.Map<ICollection<GetParkingSpot>>(data);
 
 			var pagedItem = PagedList<GetParkingSpot>.ToPagedList(dto,paginationParams.CurrentPage,paginationParams.PageSize);
 			return new ApiResponse<GetParkingSpot>(data: pagedItem);
 		}
 
-		public async Task<ApiResponse<GetParkingSpot>> GetAllAsync(PaginationParams paginationParams, string jwt) => throw new NotImplementedException();
+		public Task<ApiResponse<GetParkingSpot>> GetAllAsync(PaginationParams paginationParams, string jwt) => throw new NotImplementedException();
+
 		public async Task<ApiResponse<GetParkingSpot>> GetByIdAsync(Guid uid, string jwt)
 		{
 			TokenPayload tokenPayload = Utils.DecodeJwt(jwt);
@@ -52,7 +52,7 @@ namespace ParkeoApp.Application.Services.ParkingSpotService
 			return new ApiResponse<GetParkingSpot>(StatusCodes.Status201Created,data: [dto]);
 		}
 
-		public async Task<ApiResponse> UpdateAsync(Guid uid, AddParkingSpot model, string jwt) => throw new NotImplementedException();
+		public Task<ApiResponse> UpdateAsync(Guid uid, AddParkingSpot model, string jwt) => throw new NotImplementedException();
 
 		public async Task<ApiResponse> DeleteAsync(Guid uid, string jwt)
 		{
