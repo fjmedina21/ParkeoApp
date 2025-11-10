@@ -15,7 +15,8 @@ namespace ParkeoApp.Application.Services.ParkingSpotService
 		private IQueryable<ParkingSpot> LoadData(Guid tenantId) => dbContext.ParkingSpots
 			.Where(e => !e.DeletedAt.HasValue && e.TenantId.Equals(tenantId))
 			.Include(e => e.ParkingLot)
-			.Include(e => e.Reservations)
+			.Include(e => e.Reservations.OrderByDescending(e=>e.CreatedAt))
+			.OrderByDescending(e => e.UpdatedAt).ThenByDescending(e => e.CreatedAt)
 			.AsQueryable();
 
 		public async Task<ApiResponse<GetParkingSpot>> GetAllAsync(PaginationParams paginationParams, string jwt)
@@ -61,27 +62,6 @@ namespace ParkeoApp.Application.Services.ParkingSpotService
 			return new ApiResponse(StatusCodes.Status204NoContent);
 		}
 
-		public async Task<ApiResponse<GetReservationWNRef>> CreateReservationAsync(Guid uid, AddReservation reservation, string jwt)
-		{
-			// ToDo: validate spot capacity
-			TokenPayload tokenPayload = Utils.DecodeJwt(jwt);
 
-			Reservation newReservation = mapper.Map<Reservation>(reservation);
-
-			newReservation.TenantId = tokenPayload.Tenant;
-			newReservation.UserId = tokenPayload.User;
-			newReservation.SpotId = uid;
-
-			// ToDo: generate code and send email
-			Random rnd = new();
-			var randomNumberInRange = rnd.Next(10000, 99999).ToString();
-			newReservation.Code = randomNumberInRange;
-
-			var entry =  await dbContext.Reservations.AddAsync(newReservation);
-			await dbContext.SaveChangesAsync();
-
-			GetReservationWNRef? dto = mapper.Map<GetReservationWNRef>(entry.Entity);
-			return new ApiResponse<GetReservationWNRef>(StatusCodes.Status201Created, data: [dto]);
-		}
 	}
 }

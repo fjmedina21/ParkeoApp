@@ -7,7 +7,7 @@ using ParkeoApp.Application.Services.RoleService;
 
 namespace ParkeoApp.Api.Controllers
 {
-	[ApiController]
+	/*[ApiController]
 	[Authorize]
 	[Route("api/[controller]")]
 	public class RolesController(IRoleService service) : ControllerBase
@@ -17,7 +17,6 @@ namespace ParkeoApp.Api.Controllers
 		[ProducesResponseType<ApiResponse<GetRole>>(StatusCodes.Status400BadRequest)]
 		public async Task<IActionResult> GetAllAsync([FromHeader(Name = "Authorization")] string jwt, [FromQuery] PaginationParams qParams)
 		{
-			HttpContext ht = HttpContext;
 			var response = await service.GetAllAsync(qParams, jwt);
 			return StatusCode(response.StatusCode, response);
 		}
@@ -49,7 +48,7 @@ namespace ParkeoApp.Api.Controllers
 			var response = await service.UpdateAsync(id, model, jwt);
 			return StatusCode(response.StatusCode, response);
 		}
-		*/
+		#1#
 
 		[HttpDelete("{id:guid}")]
 		[ProducesResponseType<ApiResponse>(StatusCodes.Status204NoContent)]
@@ -60,4 +59,5 @@ namespace ParkeoApp.Api.Controllers
 			return StatusCode(response.StatusCode, response);
 		}
 	}
+*/
 }

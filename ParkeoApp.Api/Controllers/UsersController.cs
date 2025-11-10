@@ -17,7 +17,6 @@ namespace ParkeoApp.Api.Controllers
 		[ProducesResponseType<ApiResponse<GetUser>>(StatusCodes.Status400BadRequest)]
 		public async Task<IActionResult> GetAllAsync([FromHeader(Name = "Authorization")] string jwt, [FromQuery] PaginationParams qParams)
 		{
-			HttpContext ht = HttpContext;
 			var response = await service.GetAllAsync(qParams, jwt);
 			return StatusCode(response.StatusCode, response);
 		}
@@ -28,16 +27,6 @@ namespace ParkeoApp.Api.Controllers
 		public async Task<IActionResult> GetByIdAsync([FromHeader(Name = "Authorization")] string jwt, [FromRoute] Guid id)
 		{
 			var response = await service.GetByIdAsync(id, jwt);
-			return StatusCode(response.StatusCode, response);
-		}
-
-		[HttpGet("my-reservations")]
-		[ProducesResponseType<ApiResponse<GetReservationWNRef>>(StatusCodes.Status200OK)]
-		[ProducesResponseType<ApiResponse<GetReservationWNRef>>(StatusCodes.Status400BadRequest)]
-		public async Task<IActionResult> GetMyReservationsAsync([FromHeader(Name = "Authorization")] string jwt, [FromQuery] PaginationParams qParams)
-		{
-			HttpContext ht = HttpContext;
-			var response = await service.GetMyReservationsAsync(qParams, jwt);
 			return StatusCode(response.StatusCode, response);
 		}
 

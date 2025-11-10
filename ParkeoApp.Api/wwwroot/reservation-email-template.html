@@ -32,18 +32,6 @@
             color: #666;
         }
 
-        .code-box {
-            font-size: 2em;
-            background-color: #eef4ff;
-            padding: 20px;
-            text-align: center;
-            border-radius: 8px;
-            letter-spacing: 6px;
-            color: #004488;
-            font-weight: bold;
-            margin: 30px 0;
-        }
-
         .content p {
             line-height: 1.6;
             margin-bottom: 15px;
@@ -59,11 +47,22 @@
 <body>
 <div class="card">
     <div class="header">{{subject}}</div>
+    <div class="subheader">Estimado/a {{user}},</div>
+
     <div class="content">
-        <div class="code-box">{{code}}</div>
-        <p>Si usted no solicitó este código, puede ignorar este mensaje de forma segura.</p>
+        <p>Le informamos que su reservación ha sido <strong>{{action}}</strong> exitosamente.</p>
+
+        <p><strong>Detalles de la reservación:</strong></p>
+        <p>{{details}}</p>
+
+        <p>Fecha: <strong>{{date}}</strong></p>
+
+        <p>Si usted no realizó esta acción, puede comunicarse con el administrador del sistema para más información.</p>
     </div>
-    <div class="footer">Este mensaje ha sido generado automáticamente. No responda a este correo.</div>
+
+    <div class="footer">
+        Este mensaje ha sido generado automáticamente. No responda a este correo.
+    </div>
 </div>
 </body>
 </html>

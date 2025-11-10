@@ -14,9 +14,11 @@ namespace ParkeoApp.Application.Services.UserService
 	{
 		private IQueryable<User> LoadData(Guid tenantId) => dbContext.Users
 			.Where(e => !e.DeletedAt.HasValue && e.TenantId.Equals(tenantId))
-			.Include(e => e.UserRoles)
-			.Include(e => e.UsersTokens)
-			.Include(e => e.Reservations).ThenInclude(e=> e.Spot).ThenInclude(e=> e.ParkingLot)
+			.Include(e => e.UserRoles.OrderByDescending(e=>e.AssignedAt))
+			.Include(e => e.UsersTokens.OrderByDescending(e=>e.CreatedAt))
+			.Include(e => e.Reservations.OrderByDescending(e=>e.CreatedAt))
+				.ThenInclude(e=> e.Spot).ThenInclude(e=> e.ParkingLot)
+			.OrderByDescending(e => e.UpdatedAt).ThenByDescending(e => e.CreatedAt)
 			.AsQueryable();
 
 		public async Task<ApiResponse<GetUser>> GetAllAsync(PaginationParams paginationParams, string jwt)
@@ -60,16 +62,5 @@ namespace ParkeoApp.Application.Services.UserService
 			data.DeletedAt = DateTime.UtcNow;
 			return new ApiResponse(StatusCodes.Status204NoContent);
 		}
-
-		public async Task<ApiResponse<GetReservationWNRef>> GetMyReservationsAsync(PaginationParams paginationParams, string jwt)
-		{
-			TokenPayload tokenPayload = Utils.DecodeJwt(jwt);
-			User data = (await LoadData(tokenPayload.Tenant).FirstOrDefaultAsync(e => e.UserId.Equals(tokenPayload.User)))!;
-			var dto = mapper.Map<ICollection<GetReservationWNRef>>(data.Reservations);
-
-			var pagedItem = PagedList<GetReservationWNRef>.ToPagedList(dto, paginationParams.CurrentPage, paginationParams.PageSize);
-			return new ApiResponse<GetReservationWNRef>(data: pagedItem);
-		}
-
 	}
 }

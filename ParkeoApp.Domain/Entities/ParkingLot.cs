@@ -22,7 +22,7 @@ public partial class ParkingLot
 
     public DateTime? DeletedAt { get; set; }
 
-    public int Quantity { get; set; }
+    public decimal HourlyRate { get; set; }
 
     public virtual ICollection<ParkingSpot> ParkingSpots { get; set; } = new List<ParkingSpot>();
 

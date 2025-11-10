@@ -4,28 +4,18 @@ namespace ParkeoApp.Domain.DTO
 {
 	public class GetReservation
 	{
-		public Guid ReservationId { get; set; }
-		public string Code { get; set; } = null!;
-		public DateTime StartAt { get; set; }
-		public DateTime EndAt { get; set; }
-		public string Status { get; set; } = null!;
+		public Guid ReservationId { get; init; }
+		public string Code { get; init; } = null!;
+		public decimal TotalCost { get; set; }
+		public DateTime StartAt { get; init; }
+		public DateTime EndAt { get; init; }
+		public string Status { get; init; } = null!;
 		// public virtual ICollection<Payment> Payments { get; set; } = new List<Payment>();
-		public virtual GetParkingSpot Spot { get; set; } = null!;
-		public virtual GetUserWNRef User { get; set; } = null!;
-	}
-
-	public class GetReservationWNRef
-	{
-		public Guid ReservationId { get; set; }
-		public string Code { get; set; } = null!;
-		public DateTime StartAt { get; set; }
-		public DateTime EndAt { get; set; }
-		public string Status { get; set; } = null!;
-		// public virtual ICollection<Payment> Payments { get; set; } = [];
-		public virtual GetParkingSpot Spot { get; set; } = null!;
+		public virtual GetParkingSpot Spot { get; init; } = null!;
 	}
 
 	public record AddReservation(
+		Guid SpotId,
 		DateTime StartAt,
 		DateTime EndAt
 	);

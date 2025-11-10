@@ -24,6 +24,8 @@ public partial class Reservation
 
     public DateTime? DeletedAt { get; set; }
 
+    public decimal TotalCost { get; set; }
+
     public virtual ICollection<Payment> Payments { get; set; } = new List<Payment>();
 
     public virtual ParkingSpot Spot { get; set; } = null!;

@@ -17,7 +17,6 @@ namespace ParkeoApp.Api.Controllers
 		[ProducesResponseType<ApiResponse<GetParkingSpot>>(StatusCodes.Status400BadRequest)]
 		public async Task<IActionResult> GetAllAsync([FromHeader(Name = "Authorization")] string jwt, [FromQuery] PaginationParams qParams)
 		{
-			HttpContext ht = HttpContext;
 			var response = await service.GetAllAsync(qParams, jwt);
 			return StatusCode(response.StatusCode, response);
 		}
@@ -57,15 +56,6 @@ namespace ParkeoApp.Api.Controllers
 		public async Task<IActionResult> DeleteAsync([FromHeader(Name = "Authorization")] string jwt, [FromRoute] Guid id)
 		{
 			var response = await service.DeleteAsync(id, jwt);
-			return StatusCode(response.StatusCode, response);
-		}
-
-		[HttpPost("{id:guid}/create-reservation")]
-		[ProducesResponseType<ApiResponse<GetReservationWNRef>>(StatusCodes.Status201Created)]
-		[ProducesResponseType<ApiResponse<GetReservationWNRef>>(StatusCodes.Status400BadRequest)]
-		public async Task<IActionResult> CreateReservationAsync([FromHeader(Name = "Authorization")] string jwt, [FromRoute] Guid id, [FromBody] AddReservation model)
-		{
-			var response = await service.CreateReservationAsync(id, model, jwt);
 			return StatusCode(response.StatusCode, response);
 		}
 	}

@@ -19,13 +19,13 @@ namespace ParkeoApp.Application.Helpers
 
 		public static string GenerateSessionJwtAsync(User entity, IConfiguration configuration)
 		{
-			var key = Encoding.UTF8.GetBytes(configuration["JWTSettings:key"]!);
+			byte[] key = Encoding.UTF8.GetBytes(configuration["JWTSettings:key"]!);
 			var validHours = int.Parse(configuration["JWTSettings:expiresIn-hours"]!);
 
 			List<Claim> authClaims =
 			[
-				new Claim("userId", entity.UserId.ToString()),
-				new Claim("tenantId", entity.TenantId.ToString()),
+				new("userId", entity.UserId.ToString()),
+				new("tenantId", entity.TenantId.ToString()),
 			];
 
 			var secretKey = new SymmetricSecurityKey(key);
@@ -38,12 +38,12 @@ namespace ParkeoApp.Application.Helpers
 
 		public static string GenerateRefreshJwtAsync(User entity, IConfiguration configuration)
 		{
-			var key = Encoding.UTF8.GetBytes(configuration["JWTSettings:key"]!);
+			byte[] key = Encoding.UTF8.GetBytes(configuration["JWTSettings:key"]!);
 			var validHours = int.Parse(configuration["JWTSettings:expiresIn-refreshToken-hours"]!);
 
 			List<Claim> authClaims =
 			[
-				new Claim("userId", entity.UserId.ToString())
+				new("userId", entity.UserId.ToString())
 			];
 
 			var secretKey = new SymmetricSecurityKey(key);
@@ -67,6 +67,7 @@ namespace ParkeoApp.Application.Helpers
 
 			return to;
 		}
+
 		public static RefreshTokenPayload DecodeRefreshJwt(string token)
 		{
 			string[] bearerToken = token.Split(' ');
@@ -82,7 +83,7 @@ namespace ParkeoApp.Application.Helpers
 
 		public static string GenerateResetPasswordJwtAsync(string email, IConfiguration configuration)
 		{
-			var key = Encoding.UTF8.GetBytes(configuration["JWTSetting:resetPasswordKey"]!);
+			byte[] key = Encoding.UTF8.GetBytes(configuration["JWTSetting:resetPasswordKey"]!);
 			var validMinutes = int.Parse(configuration["JWTSetting:resetPasswordTokenExpiresIn-minutes"]!);
 
 			List<Claim> resetPasswordClaims =
@@ -109,7 +110,7 @@ namespace ParkeoApp.Application.Helpers
 		{
 			JwtSecurityToken jwt = new JwtSecurityTokenHandler().ReadJwtToken(token);
 
-			int exp = int.Parse(jwt.Claims.First(c => c.Type == "exp").Value);
+			var exp = int.Parse(jwt.Claims.First(c => c.Type == "exp").Value);
 			long currentTime = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
 			return currentTime < exp;
 		}
@@ -130,22 +131,33 @@ namespace ParkeoApp.Application.Helpers
 
 		#endregion
 
-		public async static Task SendReservationCode(Reservation reservation, IConfiguration configuration)
+		public static void SendReservationEmailNotification(Reservation reservation, string action, string subject, IConfiguration configuration)
 		{
-			Random rnd = new();
-			var randomNumberInRange = rnd.Next(100000, 999999).ToString();
+			var details = $$"""
+			               <b>Código:</b> {{reservation.Code}}<br/>
+			               <b>Fecha:</b> {{reservation.StartAt.ToLongDateString()}}<br/>
+			               <b>Hora Inicio:</b> {{reservation.StartAt:hh:mm tt}}<br/>
+			               <b>Hora Fin:</b> {{reservation.EndAt:hh:mm tt}}<br/>
+			               <b>Costo:</b> {{reservation.TotalCost}}<br/>
+			               <b>Tipo de espacio:</b> {{reservation.Spot.SpotType}}<br/>
+			               <b>Piso:</b> {{reservation.Spot.Floor}}<br/>
+			               <b>Parqueo:</b> {{reservation.Spot.ParkingLot.Name}}<br/>
+			               <b>Dirección:</b> {{reservation.Spot.ParkingLot.Address}}<br/>
+			               <b>Descripción:</b> {{reservation.Spot.ParkingLot.Description}}
+			               """;
 
-			reservation.Code = HashText(randomNumberInRange);
-
-			string templatePath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "send-code-by-email-template.html");
-			string htmlFile = await File.ReadAllTextAsync(templatePath);
-			const string subject = "Código de Reserva";
+			var now = DateTime.Now;
+			string templatePath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "reservation-email-template.html");
+			string htmlFile = File.ReadAllText(templatePath);
 			string htmlBody = htmlFile
 				.Replace("{{subject}}", subject)
-				.Replace("{{code}}", randomNumberInRange);
+				.Replace("{{user}}", $"{reservation.User.FirstName} {reservation.User.LastName}")
+				.Replace("{{action}}", action)
+				.Replace("{{details}}", details)
+				.Replace("{{date}}", $"{now.ToLongDateString()} {now.ToLongTimeString()}");
 
 			var mail = new EmailReq(To: [reservation.User.Email], Subject: subject, Body: htmlBody);
-			await SendEmailAsync(mail, configuration);
+			SendEmail(mail, configuration);
 		}
 
 		// public async static Task SendVerificationCode( User user ,IConfiguration configuration)
@@ -161,8 +173,8 @@ namespace ParkeoApp.Application.Helpers
 		// 	string htmlFile = await File.ReadAllTextAsync(templatePath);
 		// const string subject = "Código de Verificación";
 		// string htmlBody = htmlFile
-			// 	.Replace("{{subject}}", subject)
-			// 	.Replace("{{code}}", randomNumberInRange);
+		// 	.Replace("{{subject}}", subject)
+		// 	.Replace("{{code}}", randomNumberInRange);
 		//
 		// 	var mail = new EmailReq(To: [user.Email], Subject: subject, Body: htmlBody);
 		// 	await SendEmailAsync(mail, configuration);
@@ -192,15 +204,15 @@ namespace ParkeoApp.Application.Helpers
 			return sb.ToString().Normalize(NormalizationForm.FormC);
 		}
 
-		public async static Task SendEmailAsync(EmailReq request, IConfiguration configuration)
+		public static void SendEmail(EmailReq request, IConfiguration configuration)
 		{
 			string host = configuration["Smtp:Host"]!;
-			int port = int.Parse(configuration["Smtp:Port"]!);
+			var port = int.Parse(configuration["Smtp:Port"]!);
 			string user = configuration["Smtp:AppPassword:User"]!;
 			string password = configuration["Smtp:AppPassword:Pass"]!;
 
 			InternetAddressList emailsList = [];
-			foreach (var item in request.To) emailsList.Add(MailboxAddress.Parse(item));
+			foreach (string item in request.To) emailsList.Add(MailboxAddress.Parse(item));
 
 			var email = new MimeMessage();
 			email.From.Add(MailboxAddress.Parse(user));
@@ -209,10 +221,10 @@ namespace ParkeoApp.Application.Helpers
 			email.Body = new TextPart(TextFormat.Html) { Text = $"{request.Body}" };
 
 			var smtp = new SmtpClient();
-			await smtp.ConnectAsync(host, port);
-			await smtp.AuthenticateAsync(user, password);
-			await smtp.SendAsync(email);
-			await smtp.DisconnectAsync(true);
+			smtp.Connect(host, port);
+			smtp.Authenticate(user, password);
+			smtp.Send(email);
+			smtp.Disconnect(true);
 		}
 	}
 }

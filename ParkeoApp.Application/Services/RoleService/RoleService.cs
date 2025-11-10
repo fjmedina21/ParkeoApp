@@ -14,7 +14,8 @@ namespace ParkeoApp.Application.Services.RoleService
 	{
 		private IQueryable<Role> LoadData(Guid tenantId) => dbContext.Roles
 			.Where(e => !e.DeletedAt.HasValue && e.TenantId.Equals(tenantId))
-			.Include(e => e.UserRoles)
+			.Include(e => e.UserRoles.OrderByDescending(e=>e.AssignedAt))
+			.OrderByDescending(e => e.UpdatedAt).ThenByDescending(e => e.CreatedAt)
 			.AsQueryable();
 
 		public async Task<ApiResponse<GetRole>> GetAllAsync(PaginationParams paginationParams, string jwt)

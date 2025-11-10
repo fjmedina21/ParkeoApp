@@ -19,7 +19,6 @@ namespace ParkeoApp.Api.Controllers
         [ProducesResponseType<ApiResponse<GetTenant>>(StatusCodes.Status400BadRequest)]
         public async Task<IActionResult> GetAllAsync([FromQuery] PaginationParams qParams)
         {
-            HttpContext ht = HttpContext;
             var response = await service.GetAllAsync(qParams);
             return StatusCode(response.StatusCode, response);
         }

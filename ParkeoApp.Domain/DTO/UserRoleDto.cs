@@ -8,14 +8,14 @@ namespace ParkeoApp.Domain.DTO
 		public virtual GetRole Role { get; set; } = null!;
 	}
 
-	public class GetUserRoleWNRole
+	public class GetUserRoleWnRole
 	{
 		public Guid UserRoleId { get; set; }
 		public DateTime AssignedAt { get; set; }
 		public virtual GetUser User { get; set; } = null!;
 	}
 
-	public class GetUserRoleWNUser
+	public class GetUserRoleWnUser
 	{
 		public Guid UserRoleId { get; set; }
 		public DateTime AssignedAt { get; set; }

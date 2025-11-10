@@ -6,6 +6,8 @@ using ParkeoApp.Application.Middlewares;
 using ParkeoApp.Application.Services.AuthService;
 using ParkeoApp.Application.Services.ParkingLotService;
 using ParkeoApp.Application.Services.ParkingSpotService;
+using ParkeoApp.Application.Services.ReservationService;
+using ParkeoApp.Application.Services.ReservationStateService;
 using ParkeoApp.Application.Services.RoleService;
 using ParkeoApp.Application.Services.TenantService;
 using ParkeoApp.Application.Services.UserService;
@@ -30,6 +32,8 @@ namespace ParkeoApp.Application
 			services.AddScoped<IParkingSpotService, ParkingSpotService>();
 			services.AddScoped<IUserService, UserService>();
 			services.AddScoped<IRoleService, RoleService>();
+			services.AddScoped<IReservationService, ReservationService>();
+			services.AddScoped<IReservationStateService, ReservationStateService>();
 
 
 			services.AddTransient<GlobalErrorHandler>();

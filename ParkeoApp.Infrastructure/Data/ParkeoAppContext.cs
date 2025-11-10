@@ -58,6 +58,9 @@ public partial class ParkeoAppContext : DbContext
                 .HasColumnName("created_at");
             entity.Property(e => e.DeletedAt).HasColumnName("deleted_at");
             entity.Property(e => e.Description).HasColumnName("description");
+            entity.Property(e => e.HourlyRate)
+                .HasPrecision(18, 2)
+                .HasColumnName("hourly_rate");
             entity.Property(e => e.Latitude)
                 .HasPrecision(9, 6)
                 .HasColumnName("latitude");
@@ -67,7 +70,6 @@ public partial class ParkeoAppContext : DbContext
             entity.Property(e => e.Name)
                 .HasMaxLength(200)
                 .HasColumnName("name");
-            entity.Property(e => e.Quantity).HasColumnName("quantity");
             entity.Property(e => e.TenantId).HasColumnName("tenant_id");
             entity.Property(e => e.UpdatedAt)
                 .HasDefaultValueSql("CURRENT_TIMESTAMP")
@@ -106,7 +108,7 @@ public partial class ParkeoAppContext : DbContext
                 .HasColumnName("spot_type");
             entity.Property(e => e.Status)
                 .HasMaxLength(50)
-                .HasDefaultValueSql("'AVAILABLE'::character varying")
+                .HasDefaultValueSql("'Available'::character varying")
                 .HasColumnName("status");
             entity.Property(e => e.TenantId).HasColumnName("tenant_id");
             entity.Property(e => e.UpdatedAt)
@@ -223,9 +225,12 @@ public partial class ParkeoAppContext : DbContext
                 .HasColumnName("start_at");
             entity.Property(e => e.Status)
                 .HasMaxLength(50)
-                .HasDefaultValueSql("'RESERVED'::character varying")
+                .HasDefaultValueSql("'Reserved'::character varying")
                 .HasColumnName("status");
             entity.Property(e => e.TenantId).HasColumnName("tenant_id");
+            entity.Property(e => e.TotalCost)
+                .HasPrecision(18, 2)
+                .HasColumnName("total_cost");
             entity.Property(e => e.UpdatedAt)
                 .HasDefaultValueSql("CURRENT_TIMESTAMP")
                 .HasColumnName("updated_at");

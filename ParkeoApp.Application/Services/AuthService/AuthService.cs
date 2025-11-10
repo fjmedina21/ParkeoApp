@@ -32,7 +32,6 @@ namespace ParkeoApp.Application.Services.AuthService
 		public async Task<ApiResponse<GetUser>> SignupAsync(AddUser signup, HttpContext httpContext)
 		{
 			User newUser = mapper.Map<User>(signup);
-
 			if (await Validations.EmailExist(signup.Email, dbContext)) return new ApiResponse<GetUser>(statusCode: StatusCodes.Status400BadRequest, message: "Email already exists.");
 
 			newUser.PasswordHash = Utils.HashText(signup.Password);
@@ -47,8 +46,7 @@ namespace ParkeoApp.Application.Services.AuthService
 
 		public async Task<ApiResponse> ChangePasswordAsync(ChangePasswordDto model, string token)
 		{
-			var payload = Utils.DecodeJwt(token);
-
+			TokenPayload payload = Utils.DecodeJwt(token);
 			User? user = await dbContext.Users.Where(e => !e.DeletedAt.HasValue)
 				.FirstOrDefaultAsync(e => e.UserId.Equals(payload.User));
 
@@ -92,7 +90,7 @@ namespace ParkeoApp.Application.Services.AuthService
 				.Replace("{{code}}", randomNumberInRange);
 
 			var mail = new EmailReq(To: [user.Email], Subject: subject, Body: htmlBody);
-			await Utils.SendEmailAsync(mail, configuration);
+			Utils.SendEmail(mail, configuration);
 
 			return new ApiResponse(message: $"check your email {model.Email} for further instructions");
 		}
@@ -101,8 +99,10 @@ namespace ParkeoApp.Application.Services.AuthService
 		{
 			string sessionJwtAsync = Utils.GenerateSessionJwtAsync(user, configuration);
 			string refreshJwtAsync = Utils.GenerateRefreshJwtAsync(user, configuration);
+
 			httpContext.Response.Headers["jwt"] = sessionJwtAsync;
 			httpContext.Response.Headers["refresh-jwt"] = refreshJwtAsync;
+
 			await dbContext.UsersTokens.AddAsync(new UsersToken()
 			{
 				TenantId = user.TenantId,
@@ -112,6 +112,7 @@ namespace ParkeoApp.Application.Services.AuthService
 				AccessExpiresAt = Utils.DecodeJwt(sessionJwtAsync).ExpiresIn,
 				RefreshExpiresAt = Utils.DecodeRefreshJwt(sessionJwtAsync).ExpiresIn,
 			});
+
 			await dbContext.SaveChangesAsync();
 			return sessionJwtAsync;
 		}

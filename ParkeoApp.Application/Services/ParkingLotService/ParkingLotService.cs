@@ -14,7 +14,8 @@ namespace ParkeoApp.Application.Services.ParkingLotService
 	{
 		private IQueryable<ParkingLot> LoadData(Guid tenantId) => dbContext.ParkingLots
 			.Where(e => !e.DeletedAt.HasValue && e.TenantId.Equals(tenantId))
-			.Include(e => e.ParkingSpots)
+			.Include(e => e.ParkingSpots.OrderByDescending(e=>e.CreatedAt))
+			.OrderByDescending(e => e.UpdatedAt).ThenByDescending(e => e.CreatedAt)
 			.AsQueryable();
 
 		public async Task<ApiResponse<GetParkingLot>> GetAllAsync(PaginationParams paginationParams, string jwt)

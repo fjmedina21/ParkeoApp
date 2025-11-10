@@ -2,8 +2,8 @@ namespace ParkeoApp.Domain.DTO
 {
 	public class GetRole
 	{
-		public Guid RoleId { get; set; }
-		public string Name { get; set; } = null!;
+		public Guid RoleId { get; init; }
+		public string Name { get; init; } = null!;
 		// public virtual ICollection<GetRolePermissionWNRole> RolesPermissions { get; set; } = [];
 	}
 

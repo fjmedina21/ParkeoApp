@@ -14,6 +14,7 @@ namespace ParkeoApp.Application.Services.TenantService
 	{
 		private IQueryable<Tenant> LoadData() => dbContext.Tenants
 			.Where(e => !e.DeletedAt.HasValue)
+			.OrderByDescending(e => e.UpdatedAt).ThenByDescending(e => e.CreatedAt)
 			.AsQueryable();
 
 		public async Task<ApiResponse<GetTenant>> GetAllAsync(PaginationParams paginationParams)
