@@ -4,8 +4,8 @@ using ParkeoApp.Domain.DTO;
 
 namespace ParkeoApp.Application.Services.ParkingSpotService
 {
-	public interface IParkingSpotService : IBaseService<GetParkingSpot, AddParkingSpot>
+	public interface IParkingSpotService : IBaseService<GetParkingSpotWnRef, AddParkingSpot>
 	{
-		Task<ApiResponse<GetParkingSpot>> GetByParkingLotAsync(Guid parkingLotId, PaginationParams paginationParams, string jwt);
+		Task<ApiResponse<GetParkingSpotWnRef>> GetByParkingLotAsync(Guid parkingLotId, PaginationParams paginationParams, string jwt);
 	}
 }

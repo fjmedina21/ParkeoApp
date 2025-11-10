@@ -25,6 +25,7 @@ namespace ParkeoApp.Application
 			CreateMap<AddParkingLot, ParkingLot>();
 
 			CreateMap<ParkingSpot, GetParkingSpot>();
+			CreateMap<ParkingSpot, GetParkingSpotWnRef>();
 			CreateMap<AddParkingSpot, ParkingSpot>();
 
 			CreateMap<Role, GetRole>();

@@ -13,8 +13,8 @@ namespace ParkeoApp.Api.Controllers
 	public class ParkingSpotsController(IParkingSpotService service) : ControllerBase
 	{
 		[HttpGet("lot/{parkingLotId:guid}")]
-		[ProducesResponseType<ApiResponse<GetParkingSpot>>(StatusCodes.Status200OK)]
-		[ProducesResponseType<ApiResponse<GetParkingSpot>>(StatusCodes.Status400BadRequest)]
+		[ProducesResponseType<ApiResponse<GetParkingSpotWnRef>>(StatusCodes.Status200OK)]
+		[ProducesResponseType<ApiResponse<GetParkingSpotWnRef>>(StatusCodes.Status400BadRequest)]
 		public async Task<IActionResult> GetByParkingLotAsync([FromHeader(Name = "Authorization")] string jwt, [FromRoute] Guid parkingLotId, [FromQuery] PaginationParams qParams)
 		{
 			var response = await service.GetByParkingLotAsync(parkingLotId, qParams, jwt);
@@ -22,8 +22,8 @@ namespace ParkeoApp.Api.Controllers
 		}
 
 		[HttpGet("{id:guid}")]
-		[ProducesResponseType<ApiResponse<GetParkingSpot>>(StatusCodes.Status200OK)]
-		[ProducesResponseType<ApiResponse<GetParkingSpot>>(StatusCodes.Status404NotFound)]
+		[ProducesResponseType<ApiResponse<GetParkingSpotWnRef>>(StatusCodes.Status200OK)]
+		[ProducesResponseType<ApiResponse<GetParkingSpotWnRef>>(StatusCodes.Status404NotFound)]
 		public async Task<IActionResult> GetByIdAsync([FromHeader(Name = "Authorization")] string jwt, [FromRoute] Guid id)
 		{
 			var response = await service.GetByIdAsync(id, jwt);
@@ -31,8 +31,8 @@ namespace ParkeoApp.Api.Controllers
 		}
 
 		[HttpPost]
-		[ProducesResponseType<ApiResponse<GetParkingSpot>>(StatusCodes.Status201Created)]
-		[ProducesResponseType<ApiResponse<GetParkingSpot>>(StatusCodes.Status400BadRequest)]
+		[ProducesResponseType<ApiResponse<GetParkingSpotWnRef>>(StatusCodes.Status201Created)]
+		[ProducesResponseType<ApiResponse<GetParkingSpotWnRef>>(StatusCodes.Status400BadRequest)]
 		public async Task<IActionResult> CreateAsync([FromHeader(Name = "Authorization")] string jwt, [FromBody] AddParkingSpot model)
 		{
 			var response = await service.CreateAsync(model, jwt);

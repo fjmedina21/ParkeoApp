@@ -19,7 +19,7 @@ namespace ParkeoApp.Application.Services.ReservationService
 			.Where(e => !e.DeletedAt.HasValue && e.TenantId.Equals(tenantId))
 			.Include(e => e.Payments.OrderByDescending(e => e.CreatedAt))
 			.Include(e => e.User)
-			.Include(e => e.Spot)
+			.Include(e => e.Spot).ThenInclude(e=>e.ParkingLot)
 			.OrderByDescending(e => e.UpdatedAt).ThenByDescending(e => e.CreatedAt)
 			.AsQueryable();
 
