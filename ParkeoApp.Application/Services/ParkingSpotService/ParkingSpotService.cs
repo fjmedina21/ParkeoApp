@@ -19,7 +19,7 @@ namespace ParkeoApp.Application.Services.ParkingSpotService
 			.OrderByDescending(e => e.UpdatedAt).ThenByDescending(e => e.CreatedAt)
 			.AsQueryable();
 
-		public async Task<ApiResponse<GetParkingSpot>> GetAllAsync(PaginationParams paginationParams, string jwt)
+		public async Task<ApiResponse<GetParkingSpot>> GetByParkingLotAsync(Guid parkingLotId, PaginationParams paginationParams, string jwt)
 		{
 			TokenPayload tokenPayload = Utils.DecodeJwt(jwt);
 			var data =await LoadData(tokenPayload.Tenant).ToListAsync();
@@ -29,6 +29,7 @@ namespace ParkeoApp.Application.Services.ParkingSpotService
 			return new ApiResponse<GetParkingSpot>(data: pagedItem);
 		}
 
+		public async Task<ApiResponse<GetParkingSpot>> GetAllAsync(PaginationParams paginationParams, string jwt) => throw new NotImplementedException();
 		public async Task<ApiResponse<GetParkingSpot>> GetByIdAsync(Guid uid, string jwt)
 		{
 			TokenPayload tokenPayload = Utils.DecodeJwt(jwt);

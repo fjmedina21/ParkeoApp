@@ -12,12 +12,12 @@ namespace ParkeoApp.Api.Controllers
 	[Route("api/[controller]")]
 	public class ParkingSpotsController(IParkingSpotService service) : ControllerBase
 	{
-		[HttpGet]
+		[HttpGet("lot/{parkingLotId:guid}")]
 		[ProducesResponseType<ApiResponse<GetParkingSpot>>(StatusCodes.Status200OK)]
 		[ProducesResponseType<ApiResponse<GetParkingSpot>>(StatusCodes.Status400BadRequest)]
-		public async Task<IActionResult> GetAllAsync([FromHeader(Name = "Authorization")] string jwt, [FromQuery] PaginationParams qParams)
+		public async Task<IActionResult> GetByParkingLotAsync([FromHeader(Name = "Authorization")] string jwt, [FromRoute] Guid parkingLotId, [FromQuery] PaginationParams qParams)
 		{
-			var response = await service.GetAllAsync(qParams, jwt);
+			var response = await service.GetByParkingLotAsync(parkingLotId, qParams, jwt);
 			return StatusCode(response.StatusCode, response);
 		}
 

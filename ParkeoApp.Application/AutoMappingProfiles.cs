@@ -21,8 +21,7 @@ namespace ParkeoApp.Application
 			CreateMap<ParkingLot, GetParkingLot>()
 				.ForMember(dest => dest.Available, opt => opt.MapFrom(src => src.ParkingSpots.Count(e => e.Status.ToLower().Equals("available"))))
 				.ForMember(dest => dest.Occupied, opt => opt.MapFrom(src => src.ParkingSpots.Count(e => e.Status.ToLower().Equals("occupied"))))
-				.ForMember(dest => dest.Reserved, opt => opt.MapFrom(src => src.ParkingSpots.Count(e => e.Status.ToLower().Equals("reserved"))));
-			CreateMap<ParkingLot, GetParkingLotWnRef>();
+				.ForMember(dest => dest.Maintenance, opt => opt.MapFrom(src => src.ParkingSpots.Count(e => e.Status.ToLower().Equals("maintenance"))));
 			CreateMap<AddParkingLot, ParkingLot>();
 
 			CreateMap<ParkingSpot, GetParkingSpot>();

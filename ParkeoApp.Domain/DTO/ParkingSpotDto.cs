@@ -7,7 +7,7 @@ namespace ParkeoApp.Domain.DTO
 		public string SpotType { get; init; }
 		public string Status { get; init; } = null!;
 		public int Floor { get; init; }
-		public virtual GetParkingLotWnRef ParkingLot { get; init; } = null!;
+		public virtual GetParkingLot ParkingLot { get; init; } = null!;
 	}
 
 	public class GetParkingSpotWnRef
