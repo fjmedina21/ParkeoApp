@@ -33,6 +33,10 @@ namespace ParkeoApp.Application.Services.AuthService
 		{
 			User newUser = mapper.Map<User>(signup);
 			if (await Validations.EmailExist(signup.Email, dbContext)) return new ApiResponse<GetUser>(statusCode: StatusCodes.Status400BadRequest, message: "Email already exists.");
+			Tenant? tenant = await dbContext.Tenants.FirstOrDefaultAsync(e => e.TenantId.Equals(signup.TenantId));
+
+			string domain = signup.Email.Split("@")[^1];
+			if (tenant is not null && !tenant.Domain.Equals(domain, StringComparison.OrdinalIgnoreCase)) return new ApiResponse<GetUser>(statusCode:StatusCodes.Status400BadRequest,message:"The specified domain does not match the tenant configuration.");
 
 			newUser.PasswordHash = Utils.HashText(signup.Password);
 			var entry = await dbContext.Users.AddAsync(newUser);

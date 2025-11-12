@@ -39,6 +39,24 @@ namespace ParkeoApp.Api.Controllers
 			return StatusCode(response.StatusCode, response);
 		}
 
+		[HttpPost("{id:guid}/mark-as-maintenance")]
+		[ProducesResponseType<ApiResponse<GetParkingSpotWnRef>>(StatusCodes.Status201Created)]
+		[ProducesResponseType<ApiResponse<GetParkingSpotWnRef>>(StatusCodes.Status400BadRequest)]
+		public async Task<IActionResult> MarkSpotAsMaintenance([FromHeader(Name = "Authorization")] string jwt, [FromRoute] Guid id)
+		{
+			var response = await service.MarkSpotAsMaintenanceAsync(id, jwt);
+			return StatusCode(response.StatusCode, response);
+		}
+
+		[HttpPost("{id:guid}/mark-as-available")]
+		[ProducesResponseType<ApiResponse<GetParkingSpotWnRef>>(StatusCodes.Status201Created)]
+		[ProducesResponseType<ApiResponse<GetParkingSpotWnRef>>(StatusCodes.Status400BadRequest)]
+		public async Task<IActionResult> MarkSpotAsAvailable([FromHeader(Name = "Authorization")] string jwt, [FromRoute] Guid id)
+		{
+			var response = await service.MarkSpotAsAvailableAsync(id, jwt);
+			return StatusCode(response.StatusCode, response);
+		}
+
 		/*
 		[HttpPut("{id:guid}")]
 		[ProducesResponseType<ApiResponse>(StatusCodes.Status200OK)]

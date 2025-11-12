@@ -7,8 +7,10 @@ namespace ParkeoApp.Domain.DTO
 		public string? Description { get; init; }
 		public string Address { get; init; } = null!;
 		public decimal HourlyRate { get; init; }
+		public int FloorLevels { get; set; }
 		public decimal Latitude { get; init; }
 		public decimal Longitude { get; init; }
+
 		public int Available { get; init; }
 		public int Occupied { get; init; }
 		public int Maintenance { get; init; }
@@ -18,6 +20,7 @@ namespace ParkeoApp.Domain.DTO
 		string Name,
 		string? Description,
 		decimal HourlyRate,
+		int FloorLevels,
 		string Address,
 		decimal Latitude,
 		decimal Longitude,

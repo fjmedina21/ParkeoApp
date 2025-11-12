@@ -8,7 +8,7 @@ namespace ParkeoApp.Application.Services.ReservationStateService
 {
 	public interface IReservationStateService
 	{
-		Task<(bool valid, string? msj)> Transition(ParkeoAppContext dbContext, Reservation reservation, ReservationStatus newStatus);
+		Task<(bool valid, string? msj)> ReservationStateTransition(ParkeoAppContext dbContext, Reservation reservation, ReservationStatus newStatus);
 	}
 
 }

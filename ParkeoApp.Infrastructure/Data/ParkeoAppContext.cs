@@ -58,6 +58,9 @@ public partial class ParkeoAppContext : DbContext
                 .HasColumnName("created_at");
             entity.Property(e => e.DeletedAt).HasColumnName("deleted_at");
             entity.Property(e => e.Description).HasColumnName("description");
+            entity.Property(e => e.FloorLevels)
+                .HasDefaultValue(1)
+                .HasColumnName("floor_levels");
             entity.Property(e => e.HourlyRate)
                 .HasPrecision(18, 2)
                 .HasColumnName("hourly_rate");

@@ -70,7 +70,7 @@ namespace ParkeoApp.Application.Services.ReservationService
 				return new ApiResponse<GetReservation>(statusCode: StatusCodes.Status400BadRequest, message: $"This action cannot be done. This Reservation has already been {entity.Status.ToString().ToLower()}.");
 			// ToDo: validar que venga de status Active
 
-			await stateService.Transition(dbContext, entity, ReservationStatus.Completed);
+			await stateService.ReservationStateTransition(dbContext, entity, ReservationStatus.Completed);
 			return new ApiResponse<GetReservation>(statusCode: StatusCodes.Status200OK);
 		}
 
@@ -84,7 +84,7 @@ namespace ParkeoApp.Application.Services.ReservationService
 				return new ApiResponse<GetReservation>(statusCode: StatusCodes.Status400BadRequest, message: $"This action cannot be done. This Reservation has already been {entity.Status.ToString().ToLower()}.");
 			// ToDo: validar que venga de status Reserved
 
-			await stateService.Transition(dbContext, entity, ReservationStatus.Active);
+			await stateService.ReservationStateTransition(dbContext, entity, ReservationStatus.Active);
 			return new ApiResponse<GetReservation>(statusCode: StatusCodes.Status200OK);
 		}
 
@@ -97,7 +97,7 @@ namespace ParkeoApp.Application.Services.ReservationService
 			if (IsReservationClosed(entity))
 				return new ApiResponse<GetReservation>(statusCode: StatusCodes.Status400BadRequest, message: $"This action cannot be done. This Reservation has already been {entity.Status.ToString().ToLower()}.");
 
-			await stateService.Transition(dbContext, entity, ReservationStatus.Cancelled);
+			await stateService.ReservationStateTransition(dbContext, entity, ReservationStatus.Cancelled);
 			return new ApiResponse<GetReservation>(statusCode: StatusCodes.Status200OK);
 		}
 

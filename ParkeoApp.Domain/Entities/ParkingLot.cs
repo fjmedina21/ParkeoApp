@@ -24,6 +24,8 @@ public partial class ParkingLot
 
     public decimal HourlyRate { get; set; }
 
+    public int FloorLevels { get; set; }
+
     public virtual ICollection<ParkingSpot> ParkingSpots { get; set; } = new List<ParkingSpot>();
 
     public virtual Tenant Tenant { get; set; } = null!;

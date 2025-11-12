@@ -1,6 +1,4 @@
-﻿using ParkeoApp.Domain.Enums;
-
-namespace ParkeoApp.Domain.Entities;
+﻿namespace ParkeoApp.Domain.Entities;
 
 public partial class ParkingSpot
 {

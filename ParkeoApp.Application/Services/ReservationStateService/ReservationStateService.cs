@@ -8,10 +8,10 @@ namespace ParkeoApp.Application.Services.ReservationStateService
 {
 	public class ReservationStateService(IConfiguration configuration) : IReservationStateService
 	{
-		public async Task<(bool valid, string? msj)> Transition(ParkeoAppContext dbContext, Reservation reservation, ReservationStatus newStatus)
+		public async Task<(bool valid, string? msj)> ReservationStateTransition(ParkeoAppContext dbContext, Reservation reservation, ReservationStatus newStatus)
 		{
 			if (!IsValidTransition(reservation.Status, newStatus))
-				return (false, "Transición de estado inválida.");
+				return (false, "invalid state transition.");
 
 			reservation.Status = newStatus.ToString();
 			reservation.Spot.Status = MapSpotStatus(newStatus).ToString();
