@@ -2,6 +2,7 @@
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
+using System.Text.Json;
 using ParkeoApp.Domain.DTO;
 using ParkeoApp.Domain.Entities;
 using MailKit.Net.Smtp;
@@ -133,20 +134,20 @@ namespace ParkeoApp.Application.Helpers
 
 		public static void SendReservationEmailNotification(Reservation reservation, string action, string subject, IConfiguration configuration)
 		{
-			var details = $$"""
-			               <b>Código:</b> {{reservation.Code}}<br/>
-			               <b>Fecha:</b> {{reservation.StartAt.ToLongDateString()}}<br/>
-			               <b>Hora Inicio:</b> {{reservation.StartAt:hh:mm tt}}<br/>
-			               <b>Hora Fin:</b> {{reservation.EndAt:hh:mm tt}}<br/>
-			               <b>Costo:</b> {{reservation.TotalCost}}<br/>
-			               <b>Tipo de espacio:</b> {{reservation.Spot.SpotType}}<br/>
-			               <b>Piso:</b> {{reservation.Spot.Floor}}<br/>
-			               <b>Parqueo:</b> {{reservation.Spot.ParkingLot.Name}}<br/>
-			               <b>Dirección:</b> {{reservation.Spot.ParkingLot.Address}}<br/>
-			               <b>Descripción:</b> {{reservation.Spot.ParkingLot.Description}}
-			               """;
+			var details = $"""
+			                <b>Código:</b> {reservation.Code}<br/>
+			                <b>Fecha:</b> {reservation.StartAt.ToLongDateString()}<br/>
+			                <b>Hora Inicio:</b> {reservation.StartAt:hh:mm tt}<br/>
+			                <b>Hora Fin:</b> {reservation.EndAt:hh:mm tt}<br/>
+			                <b>Costo:</b> {reservation.TotalCost}<br/>
+			                <b>Tipo de espacio:</b> {reservation.Spot.SpotType}<br/>
+			                <b>Piso:</b> {reservation.Spot.Floor}<br/>
+			                <b>Parqueo:</b> {reservation.Spot.ParkingLot.Name}<br/>
+			                <b>Dirección:</b> {reservation.Spot.ParkingLot.Address}<br/>
+			                <b>Descripción:</b> {reservation.Spot.ParkingLot.Description}
+			                """;
 
-			var now = DateTime.Now;
+			DateTime now = DateTime.Now;
 			string templatePath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "reservation-email-template.html");
 			string htmlFile = File.ReadAllText(templatePath);
 			string htmlBody = htmlFile
@@ -194,10 +195,7 @@ namespace ParkeoApp.Application.Helpers
 			foreach (var c in normalizedText)
 			{
 				var unicodeCategory = CharUnicodeInfo.GetUnicodeCategory(c);
-				if (unicodeCategory != UnicodeCategory.NonSpacingMark)
-				{
-					sb.Append(c);
-				}
+				if (unicodeCategory != UnicodeCategory.NonSpacingMark) sb.Append(c);
 			}
 
 			// Normaliza de nuevo a FormC (composición)

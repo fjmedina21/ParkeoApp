@@ -1,6 +1,8 @@
+using System.Diagnostics.CodeAnalysis;
 using AutoMapper;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 using ParkeoApp.Application.Helpers;
 using ParkeoApp.Application.Helpers.Pagination;
 using ParkeoApp.Domain.ApiResponseModels;
@@ -10,28 +12,38 @@ using ParkeoApp.Infrastructure.Data;
 
 namespace ParkeoApp.Application.Services.ParkingLotService
 {
-	public class ParkingLotService(ParkeoAppContext dbContext, IMapper mapper) : IParkingLotService
+	public class ParkingLotService(ParkeoAppContext dbContext, IMapper mapper, IConfiguration configuration) : IParkingLotService
 	{
 		private IQueryable<ParkingLot> LoadData(Guid tenantId) => dbContext.ParkingLots
 			.Where(e => !e.DeletedAt.HasValue && e.TenantId.Equals(tenantId))
-			.Include(e => e.ParkingSpots.OrderByDescending(e=>e.CreatedAt))
+			.Include(e => e.ParkingSpots.OrderByDescending(e => e.CreatedAt))
 			.OrderByDescending(e => e.UpdatedAt).ThenByDescending(e => e.CreatedAt)
 			.AsQueryable();
 
-		public async Task<ApiResponse<GetParkingLot>> GetAllAsync(PaginationParams paginationParams, string jwt)
+		public async Task<ApiResponse<GetParkingLot>> GetAllAsync(PaginationParams paginationParams, string jwt,
+			double? originLat,
+			double? originLng)
 		{
 			TokenPayload tokenPayload = Utils.DecodeJwt(jwt);
-			var data =await LoadData(tokenPayload.Tenant).ToListAsync();
-			var dto = mapper.Map<ICollection<GetParkingLot>>(data);
+			var data = await LoadData(tokenPayload.Tenant).ToListAsync();
+			var dto = mapper.Map<List<GetParkingLot>>(data);
 
-			var pagedItem = PagedList<GetParkingLot>.ToPagedList(dto,paginationParams.CurrentPage,paginationParams.PageSize);
+			// Si se reciben coordenadas, ordenamos por distancia usando Routes API
+			if (originLat.HasValue && originLng.HasValue)
+			{
+				dto = await GoogleUtils.GetLotsOrderedByDistanceAsync(originLat.Value, originLng.Value, dto, configuration);
+			}
+
+			var pagedItem = PagedList<GetParkingLot>.ToPagedList(dto, paginationParams.CurrentPage, paginationParams.PageSize);
 			return new ApiResponse<GetParkingLot>(data: pagedItem);
 		}
+
+		public Task<ApiResponse<GetParkingLot>> GetAllAsync(PaginationParams paginationParams, string jwt) => throw new NotImplementedException();
 
 		public async Task<ApiResponse<GetParkingLot>> GetByIdAsync(Guid uid, string jwt)
 		{
 			TokenPayload tokenPayload = Utils.DecodeJwt(jwt);
-			ParkingLot? data =  await LoadData(tokenPayload.Tenant).FirstOrDefaultAsync(e =>e.ParkingLotId.Equals(uid));
+			ParkingLot? data = await LoadData(tokenPayload.Tenant).FirstOrDefaultAsync(e => e.ParkingLotId.Equals(uid));
 			if (data is null) return new ApiResponse<GetParkingLot>(StatusCodes.Status400BadRequest);
 			GetParkingLot? dto = mapper.Map<GetParkingLot>(data);
 			return new ApiResponse<GetParkingLot>(data: [dto]);
@@ -49,7 +61,7 @@ namespace ParkeoApp.Application.Services.ParkingLotService
 			await dbContext.SaveChangesAsync();
 
 			GetParkingLot? dto = mapper.Map<GetParkingLot>(entry.Entity);
-			return new ApiResponse<GetParkingLot>(StatusCodes.Status201Created,data: [dto]);
+			return new ApiResponse<GetParkingLot>(StatusCodes.Status201Created, data: [dto]);
 		}
 
 		public async Task<ApiResponse> UpdateAsync(Guid uid, AddParkingLot model, string jwt) => throw new NotImplementedException();

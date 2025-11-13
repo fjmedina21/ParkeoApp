@@ -6,6 +6,5 @@ namespace ParkeoApp.Domain.Enums
 		Active,
 		Completed,
 		Cancelled
-
 	}
 }

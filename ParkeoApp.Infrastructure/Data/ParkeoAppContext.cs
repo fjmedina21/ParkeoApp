@@ -64,12 +64,8 @@ public partial class ParkeoAppContext : DbContext
             entity.Property(e => e.HourlyRate)
                 .HasPrecision(18, 2)
                 .HasColumnName("hourly_rate");
-            entity.Property(e => e.Latitude)
-                .HasPrecision(9, 6)
-                .HasColumnName("latitude");
-            entity.Property(e => e.Longitude)
-                .HasPrecision(9, 6)
-                .HasColumnName("longitude");
+            entity.Property(e => e.Latitude).HasColumnName("latitude");
+            entity.Property(e => e.Longitude).HasColumnName("longitude");
             entity.Property(e => e.Name)
                 .HasMaxLength(200)
                 .HasColumnName("name");

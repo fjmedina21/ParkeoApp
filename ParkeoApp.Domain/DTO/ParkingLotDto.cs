@@ -8,9 +8,9 @@ namespace ParkeoApp.Domain.DTO
 		public string Address { get; init; } = null!;
 		public decimal HourlyRate { get; init; }
 		public int FloorLevels { get; set; }
-		public decimal Latitude { get; init; }
-		public decimal Longitude { get; init; }
-
+		public double Latitude { get; init; }
+		public double Longitude { get; init; }
+		public double? DistanceKm { get; set; }
 		public int Available { get; init; }
 		public int Occupied { get; init; }
 		public int Maintenance { get; init; }
@@ -22,8 +22,8 @@ namespace ParkeoApp.Domain.DTO
 		decimal HourlyRate,
 		int FloorLevels,
 		string Address,
-		decimal Latitude,
-		decimal Longitude,
+		double Latitude,
+		double Longitude,
 		ICollection<AddParkingSpot> ParkingSpots
 		);
 }

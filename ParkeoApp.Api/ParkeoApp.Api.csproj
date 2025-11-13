@@ -28,4 +28,8 @@
       <ProjectReference Include="..\ParkeoApp.Domain\ParkeoApp.Domain.csproj" />
     </ItemGroup>
 
+    <ItemGroup>
+      <Folder Include="Logs\" />
+    </ItemGroup>
+
 </Project>

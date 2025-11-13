@@ -104,7 +104,7 @@ namespace ParkeoApp.Application.Services.AuthService
 			string sessionJwtAsync = Utils.GenerateSessionJwtAsync(user, configuration);
 			string refreshJwtAsync = Utils.GenerateRefreshJwtAsync(user, configuration);
 
-			httpContext.Response.Headers["jwt"] = sessionJwtAsync;
+			httpContext.Response.Headers.Authorization = sessionJwtAsync;
 			httpContext.Response.Headers["refresh-jwt"] = refreshJwtAsync;
 
 			await dbContext.UsersTokens.AddAsync(new UsersToken()

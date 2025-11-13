@@ -9,5 +9,7 @@ namespace ParkeoApp.Application.Services.ParkingSpotService
 		Task<ApiResponse<GetParkingSpotWnRef>> GetByParkingLotAsync(Guid parkingLotId, PaginationParams paginationParams, string jwt);
 		Task<ApiResponse> MarkSpotAsMaintenanceAsync(Guid uid, string jwt);
 		Task<ApiResponse> MarkSpotAsAvailableAsync(Guid uid, string jwt);
+		// get spots mas cercanos
+
 	}
 }
