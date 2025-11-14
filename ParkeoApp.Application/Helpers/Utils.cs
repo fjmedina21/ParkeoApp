@@ -132,7 +132,7 @@ namespace ParkeoApp.Application.Helpers
 
 		#endregion
 
-		public static void SendReservationEmailNotification(Reservation reservation, string action, string subject, IConfiguration configuration)
+		public async static Task SendReservationEmailNotification(Reservation reservation, string action, string subject, IConfiguration configuration)
 		{
 			var details = $"""
 			                <b>Código:</b> {reservation.Code}<br/>
@@ -158,7 +158,7 @@ namespace ParkeoApp.Application.Helpers
 				.Replace("{{date}}", $"{now.ToLongDateString()} {now.ToLongTimeString()}");
 
 			var mail = new EmailReq(To: [reservation.User.Email], Subject: subject, Body: htmlBody);
-			SendEmail(mail, configuration);
+			await SendEmailAsync(mail, configuration);
 		}
 
 		// public async static Task SendVerificationCode( User user ,IConfiguration configuration)
@@ -202,7 +202,7 @@ namespace ParkeoApp.Application.Helpers
 			return sb.ToString().Normalize(NormalizationForm.FormC);
 		}
 
-		public static void SendEmail(EmailReq request, IConfiguration configuration)
+		public async static Task SendEmailAsync(EmailReq request, IConfiguration configuration)
 		{
 			string host = configuration["Smtp:Host"]!;
 			var port = int.Parse(configuration["Smtp:Port"]!);
@@ -219,10 +219,10 @@ namespace ParkeoApp.Application.Helpers
 			email.Body = new TextPart(TextFormat.Html) { Text = $"{request.Body}" };
 
 			var smtp = new SmtpClient();
-			smtp.Connect(host, port);
-			smtp.Authenticate(user, password);
-			smtp.Send(email);
-			smtp.Disconnect(true);
+			await smtp.ConnectAsync(host, port);
+			await smtp.AuthenticateAsync(user, password);
+			await smtp.SendAsync(email);
+			await smtp.DisconnectAsync(true);
 		}
 	}
 }

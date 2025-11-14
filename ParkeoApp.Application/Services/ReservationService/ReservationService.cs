@@ -19,7 +19,7 @@ namespace ParkeoApp.Application.Services.ReservationService
 			.Where(e => !e.DeletedAt.HasValue && e.TenantId.Equals(tenantId))
 			.Include(e => e.Payments.OrderByDescending(e => e.CreatedAt))
 			.Include(e => e.User)
-			.Include(e => e.Spot).ThenInclude(e=>e.ParkingLot)
+			.Include(e => e.Spot).ThenInclude(e => e.ParkingLot)
 			.OrderByDescending(e => e.UpdatedAt).ThenByDescending(e => e.CreatedAt)
 			.AsQueryable();
 
@@ -28,11 +28,11 @@ namespace ParkeoApp.Application.Services.ReservationService
 			TokenPayload tokenPayload = Utils.DecodeJwt(jwt);
 			Reservation newReservation = mapper.Map<Reservation>(reservation);
 
-			(bool isValid, string msj) = await CheckReservationAvailabilityAsync(newReservation, jwt);
+			(bool isValid, string? msj) = await CheckReservationAvailabilityAsync(newReservation, jwt);
 			if (!isValid) return new ApiResponse<GetReservation>(StatusCodes.Status400BadRequest, message: msj);
 
 			ParkingSpot? spot = await dbContext.ParkingSpots.Include(e => e.ParkingLot)
-				.Where(e=>!e.DeletedAt.HasValue && e.TenantId.Equals(Utils.DecodeJwt(jwt).Tenant))
+				.Where(e => !e.DeletedAt.HasValue && e.TenantId.Equals(Utils.DecodeJwt(jwt).Tenant))
 				.FirstOrDefaultAsync(e => e.SpotId.Equals(reservation.SpotId));
 
 			decimal hourRate = spot!.ParkingLot.HourlyRate;
@@ -51,7 +51,7 @@ namespace ParkeoApp.Application.Services.ReservationService
 			await dbContext.SaveChangesAsync();
 
 			Reservation? createdReservation = await LoadData(tokenPayload.Tenant).FirstOrDefaultAsync(e => e.ReservationId.Equals(entry.Entity.ReservationId));
-			Utils.SendReservationEmailNotification(createdReservation!,
+			await Utils.SendReservationEmailNotification(createdReservation!,
 				"creada",
 				"ParkeoApp: Reserva creada exitosamente",
 				configuration);
@@ -66,12 +66,10 @@ namespace ParkeoApp.Application.Services.ReservationService
 			Reservation? entity = await LoadData(tokenPayload.Tenant).FirstOrDefaultAsync(e => e.Code == reservationCode);
 			if (entity is null) return new ApiResponse<GetReservation>(statusCode: StatusCodes.Status400BadRequest);
 
-			if (IsReservationClosed(entity))
-				return new ApiResponse<GetReservation>(statusCode: StatusCodes.Status400BadRequest, message: $"This action cannot be done. This Reservation has already been {entity.Status.ToString().ToLower()}.");
-			// ToDo: validar que venga de status Active
-
-			await stateService.ReservationStateTransition(dbContext, entity, ReservationStatus.Completed);
-			return new ApiResponse<GetReservation>(statusCode: StatusCodes.Status200OK);
+			(bool validTransition, string? msj) = await stateService.ReservationStateTransition(dbContext, entity, ReservationStatus.Completed);
+			return !validTransition
+				? new ApiResponse<GetReservation>(statusCode: StatusCodes.Status400BadRequest, message: msj)
+				: new ApiResponse<GetReservation>(statusCode: StatusCodes.Status200OK, message: "Reservation Checked Out.");
 		}
 
 		public async Task<ApiResponse<GetReservation>> CheckInAsync(string reservationCode, string jwt)
@@ -80,12 +78,10 @@ namespace ParkeoApp.Application.Services.ReservationService
 			Reservation? entity = await LoadData(tokenPayload.Tenant).FirstOrDefaultAsync(e => e.Code == reservationCode);
 			if (entity is null) return new ApiResponse<GetReservation>(statusCode: StatusCodes.Status400BadRequest);
 
-			if (IsReservationClosed(entity))
-				return new ApiResponse<GetReservation>(statusCode: StatusCodes.Status400BadRequest, message: $"This action cannot be done. This Reservation has already been {entity.Status.ToString().ToLower()}.");
-			// ToDo: validar que venga de status Reserved
-
-			await stateService.ReservationStateTransition(dbContext, entity, ReservationStatus.Active);
-			return new ApiResponse<GetReservation>(statusCode: StatusCodes.Status200OK);
+			(bool validTransition, string? msj) = await stateService.ReservationStateTransition(dbContext, entity, ReservationStatus.Active);
+			return !validTransition
+				? new ApiResponse<GetReservation>(statusCode: StatusCodes.Status400BadRequest, message: msj)
+				: new ApiResponse<GetReservation>(statusCode: StatusCodes.Status200OK, message: "Reservation Checked In.");
 		}
 
 		public async Task<ApiResponse<GetReservation>> CancelAsync(string reservationCode, string jwt)
@@ -94,11 +90,10 @@ namespace ParkeoApp.Application.Services.ReservationService
 			Reservation? entity = await LoadData(tokenPayload.Tenant).FirstOrDefaultAsync(e => e.Code == reservationCode);
 			if (entity is null) return new ApiResponse<GetReservation>(statusCode: StatusCodes.Status400BadRequest);
 
-			if (IsReservationClosed(entity))
-				return new ApiResponse<GetReservation>(statusCode: StatusCodes.Status400BadRequest, message: $"This action cannot be done. This Reservation has already been {entity.Status.ToString().ToLower()}.");
-
-			await stateService.ReservationStateTransition(dbContext, entity, ReservationStatus.Cancelled);
-			return new ApiResponse<GetReservation>(statusCode: StatusCodes.Status200OK);
+			(bool validTransition, string? msj) = await stateService.ReservationStateTransition(dbContext, entity, ReservationStatus.Cancelled);
+			return !validTransition
+				? new ApiResponse<GetReservation>(statusCode: StatusCodes.Status400BadRequest, message: msj)
+				: new ApiResponse<GetReservation>(statusCode: StatusCodes.Status200OK, message: "Reservation Cancelled.");
 		}
 
 		public async Task<ApiResponse<GetReservation>> GetByCodeAsync(string reservationCode, string jwt)
@@ -120,20 +115,19 @@ namespace ParkeoApp.Application.Services.ReservationService
 			return new ApiResponse<GetReservation>(statusCode: StatusCodes.Status200OK, data: pagedItem);
 		}
 
-		private static bool IsReservationClosed(Reservation entity) => entity.Status == nameof(ReservationStatus.Completed)
-		 || entity.Status == nameof(ReservationStatus.Cancelled);
-		private async Task<(bool isValid, string message)> CheckReservationAvailabilityAsync(Reservation reservation, string jwt)
+		private async Task<(bool isValid, string? message)> CheckReservationAvailabilityAsync(Reservation reservation, string jwt)
 		{
 			// 1. Validar fechas
-			if (reservation.StartAt <= DateTime.UtcNow) return (false, "La fecha de inicio debe ser posterior al momento actual.");
-			if (reservation.EndAt <= reservation.StartAt) return (false, "La fecha de fin debe ser posterior a la de inicio.");
+			if (reservation.StartAt <= DateTime.UtcNow.ToLocalTime()) return (false, "The start date cannot be in the past.");
+			if (reservation.EndAt <= reservation.StartAt) return (false, "The end date cannot be before the start date.");
 
 			// 2. Validar disponibilidad del espacio
 			ParkingSpot? spot = await dbContext.ParkingSpots
-				.Where(e=>!e.DeletedAt.HasValue && e.TenantId.Equals(Utils.DecodeJwt(jwt).Tenant))
-				.FirstOrDefaultAsync(e=>e.SpotId == reservation.SpotId);
+				.Where(e => !e.DeletedAt.HasValue && e.TenantId.Equals(Utils.DecodeJwt(jwt).Tenant))
+				.FirstOrDefaultAsync(e => e.SpotId == reservation.SpotId);
 
-			if (spot != null && !spot.Status.Equals(nameof(SpotStatus.Available), StringComparison.CurrentCultureIgnoreCase)) return (false, "El espacio no está disponible para reservar.");
+			if (spot != null && !spot.Status.Equals(nameof(SpotStatus.Available), StringComparison.CurrentCultureIgnoreCase))
+				return (false, "Spot is not available.");
 
 			// 3. Validar conflicto de horario (interpolación)
 			bool hasConflict = await LoadData(Utils.DecodeJwt(jwt).Tenant).AnyAsync(r =>
@@ -149,8 +143,8 @@ namespace ParkeoApp.Application.Services.ReservationService
 			);
 
 			return hasConflict
-				? (false, "Ya existe una reserva activa en el horario seleccionado.")
-				: (true, "La reserva es válida.");
+				? (false, "There is a conflict with another reservation.")
+				: (true, null);
 		}
 	}
 }

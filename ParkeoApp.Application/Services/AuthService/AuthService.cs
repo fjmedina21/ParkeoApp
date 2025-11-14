@@ -94,7 +94,7 @@ namespace ParkeoApp.Application.Services.AuthService
 				.Replace("{{code}}", randomNumberInRange);
 
 			var mail = new EmailReq(To: [user.Email], Subject: subject, Body: htmlBody);
-			Utils.SendEmail(mail, configuration);
+			await Utils.SendEmailAsync(mail, configuration);
 
 			return new ApiResponse(message: $"check your email {model.Email} for further instructions");
 		}

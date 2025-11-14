@@ -11,7 +11,7 @@ namespace ParkeoApp.Application.Services.ReservationStateService
 		public async Task<(bool valid, string? msj)> ReservationStateTransition(ParkeoAppContext dbContext, Reservation reservation, ReservationStatus newStatus)
 		{
 			if (!IsValidTransition(reservation.Status, newStatus))
-				return (false, "invalid state transition.");
+				return (false, $"Invalid state transition. Current status: {reservation.Status}, attempted new status: {newStatus}");
 
 			reservation.Status = newStatus.ToString();
 			reservation.Spot.Status = MapSpotStatus(newStatus).ToString();
@@ -19,7 +19,7 @@ namespace ParkeoApp.Application.Services.ReservationStateService
 
 			(string action, string subject) = GetNotificationForTransition(newStatus);
 
-			Utils.SendReservationEmailNotification(
+			await Utils.SendReservationEmailNotification(
 				reservation!,
 				action.ToLower(),
 				subject,
@@ -39,7 +39,7 @@ namespace ParkeoApp.Application.Services.ReservationStateService
 				ReservationStatus.Completed => false,
 				ReservationStatus.Cancelled => false,
 				ReservationStatus.Reserved => newStatus is ReservationStatus.Active or ReservationStatus.Cancelled,
-				ReservationStatus.Active => newStatus is ReservationStatus.Completed ,
+				ReservationStatus.Active => newStatus is ReservationStatus.Completed,
 				_ => false
 			};
 		}
