@@ -51,7 +51,7 @@ namespace ParkeoApp.Api.Controllers
 		*/
 
 		[HttpDelete("{id:guid}")]
-		[ProducesResponseType<ApiResponse>(StatusCodes.Status204NoContent)]
+		[ProducesResponseType<ApiResponse>(StatusCodes.Status200OK)]
 		[ProducesResponseType<ApiResponse>(StatusCodes.Status400BadRequest)]
 		public async Task<IActionResult> DeleteAsync([FromHeader(Name = "Authorization")] string jwt, [FromRoute] Guid id)
 		{

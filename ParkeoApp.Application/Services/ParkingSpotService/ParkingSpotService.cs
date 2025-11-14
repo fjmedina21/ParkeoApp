@@ -115,7 +115,7 @@ namespace ParkeoApp.Application.Services.ParkingSpotService
 
 			data.DeletedAt = DateTime.UtcNow;
 			await dbContext.SaveChangesAsync();
-			return new ApiResponse(StatusCodes.Status204NoContent);
+			return new ApiResponse(message: "deleted successfully.");
 		}
 	}
 }

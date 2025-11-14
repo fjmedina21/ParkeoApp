@@ -58,7 +58,7 @@ namespace ParkeoApp.Application.Services.RoleService
 			if (data is null) return new ApiResponse(StatusCodes.Status400BadRequest);
 			data.DeletedAt = DateTime.UtcNow;
 			await dbContext.SaveChangesAsync();
-			return new ApiResponse(StatusCodes.Status204NoContent);
+			return new ApiResponse(message: "deleted successfully.");
 		}
 	}
 }

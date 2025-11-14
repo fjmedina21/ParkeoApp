@@ -68,14 +68,15 @@ namespace ParkeoApp.Application.Services.ParkingLotService
 			TokenPayload tokenPayload = Utils.DecodeJwt(jwt);
 			ParkingLot? data = await LoadData(tokenPayload.Tenant).FirstOrDefaultAsync(e => e.ParkingLotId.Equals(uid));
 			if (data is null) return new ApiResponse(StatusCodes.Status400BadRequest);
+			var reservations = data.ParkingSpots.SelectMany(spot => spot.Reservations);
 
-			if (data.ParkingSpots.Any(spot => spot.Reservations.Any(reservation => reservation.Status.Equals(nameof(ReservationStatus.Active)) || reservation.Status.Equals(nameof(ReservationStatus.Reserved))))
+			if (reservations.Any(reservation => reservation.Status.Equals(nameof(ReservationStatus.Active)) || reservation.Status.Equals(nameof(ReservationStatus.Reserved)))
 			    ) return new ApiResponse(StatusCodes.Status400BadRequest,
 				message: "The lot cannot be deleted because it contains occupied spots or spots with active reservations. Please clear or cancel all reservations before proceeding.");
 
 			data.DeletedAt = DateTime.UtcNow;
 			await dbContext.SaveChangesAsync();
-			return new ApiResponse(StatusCodes.Status204NoContent);
+			return new ApiResponse(message: "deleted successfully.");
 		}
 	}
 }

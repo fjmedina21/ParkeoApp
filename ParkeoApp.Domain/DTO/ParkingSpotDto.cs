@@ -23,7 +23,6 @@ namespace ParkeoApp.Domain.DTO
 		Guid? ParkingLotId,
 		string Code,
 		string SpotType,
-		string Status,
 		int Floor
 	);
 }
