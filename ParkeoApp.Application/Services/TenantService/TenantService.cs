@@ -48,7 +48,14 @@ namespace ParkeoApp.Application.Services.TenantService
 			GetTenant? dto = mapper.Map<GetTenant>(entry.Entity);
 			return new ApiResponse<GetTenant>(StatusCodes.Status201Created,data: [dto]);
 		}
-		public async Task<ApiResponse> UpdateAsync(Guid uid, AddTenant model, string jwt) => throw new NotImplementedException();
-		public async Task<ApiResponse> DeleteAsync(Guid uid, string jwt) => throw new NotImplementedException();
-	}
+		public Task<ApiResponse> UpdateAsync(Guid uid, AddTenant model, string jwt) => throw new NotImplementedException();
+		public async Task<ApiResponse> DeleteAsync(Guid uid, string jwt)
+		{
+			TokenPayload tokenPayload = Utils.DecodeJwt(jwt);
+			Tenant? data = await LoadData().FirstOrDefaultAsync(e => e.TenantId.Equals(uid));
+			if (data is null) return new ApiResponse(StatusCodes.Status400BadRequest);
+			data.DeletedAt = DateTime.UtcNow;
+			await dbContext.SaveChangesAsync();
+			return new ApiResponse(StatusCodes.Status204NoContent);
+		}	}
 }

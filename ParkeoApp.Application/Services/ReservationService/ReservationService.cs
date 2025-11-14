@@ -52,8 +52,8 @@ namespace ParkeoApp.Application.Services.ReservationService
 
 			Reservation? createdReservation = await LoadData(tokenPayload.Tenant).FirstOrDefaultAsync(e => e.ReservationId.Equals(entry.Entity.ReservationId));
 			await Utils.SendReservationEmailNotification(createdReservation!,
-				"creada",
-				"ParkeoApp: Reserva creada exitosamente",
+				"Reserved",
+				"ParkeoApp: Reservation Confirmed",
 				configuration);
 
 			GetReservation? dto = mapper.Map<GetReservation>(createdReservation);

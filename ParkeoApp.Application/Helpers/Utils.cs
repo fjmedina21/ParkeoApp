@@ -134,17 +134,18 @@ namespace ParkeoApp.Application.Helpers
 
 		public async static Task SendReservationEmailNotification(Reservation reservation, string action, string subject, IConfiguration configuration)
 		{
-			var details = $"""
-			                <b>Código:</b> {reservation.Code}<br/>
-			                <b>Fecha:</b> {reservation.StartAt.ToLongDateString()}<br/>
-			                <b>Hora Inicio:</b> {reservation.StartAt:hh:mm tt}<br/>
-			                <b>Hora Fin:</b> {reservation.EndAt:hh:mm tt}<br/>
-			                <b>Costo:</b> {reservation.TotalCost}<br/>
-			                <b>Tipo de espacio:</b> {reservation.ParkingSpot.SpotType}<br/>
-			                <b>Piso:</b> {reservation.ParkingSpot.Floor}<br/>
-			                <b>Parqueo:</b> {reservation.ParkingSpot.ParkingLot.Name}<br/>
-			                <b>Dirección:</b> {reservation.ParkingSpot.ParkingLot.Address}<br/>
-			                <b>Descripción:</b> {reservation.ParkingSpot.ParkingLot.Description}
+			var details = $$"""
+			                <b>Acción:</b> {{action}}<br/>
+			                <b>Código:</b> {{reservation.Code}}<br/>
+			                <b>Fecha:</b> {{reservation.StartAt.ToLongDateString()}}<br/>
+			                <b>Hora Inicio:</b> {{reservation.StartAt:hh:mm tt}}<br/>
+			                <b>Hora Fin:</b> {{reservation.EndAt:hh:mm tt}}<br/>
+			                <b>Costo:</b> {{reservation.TotalCost}}<br/>
+			                <b>Tipo de espacio:</b> {{reservation.ParkingSpot.SpotType}}<br/>
+			                <b>Piso:</b> {{reservation.ParkingSpot.Floor}}<br/>
+			                <b>Parqueo:</b> {{reservation.ParkingSpot.ParkingLot.Name}}<br/>
+			                <b>Dirección:</b> {{reservation.ParkingSpot.ParkingLot.Address}}<br/>
+			                <b>Descripción:</b> {{reservation.ParkingSpot.ParkingLot.Description}}
 			                """;
 
 			DateTime now = DateTime.Now;
@@ -153,7 +154,7 @@ namespace ParkeoApp.Application.Helpers
 			string htmlBody = htmlFile
 				.Replace("{{subject}}", subject)
 				.Replace("{{user}}", $"{reservation.User.FirstName} {reservation.User.LastName}")
-				.Replace("{{action}}", action)
+				.Replace("{{action}}", action.ToLower())
 				.Replace("{{details}}", details)
 				.Replace("{{date}}", $"{now.ToLongDateString()} {now.ToLongTimeString()}");
 

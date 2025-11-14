@@ -35,8 +35,8 @@ namespace ParkeoApp.Application.Services.ParkingSpotService
 			ParkingSpot? spot = await LoadData(tokenPayload.Tenant).FirstOrDefaultAsync(e => e.ParkingSpotId.Equals(uid));
 			if (spot is null) return new ApiResponse(StatusCodes.Status400BadRequest);
 
-			(bool validForMaintenance, string? errMsj) =await ValidateParkingSpotForMaintenance(spot, jwt);
-			if(!validForMaintenance) return new ApiResponse(StatusCodes.Status400BadRequest, errMsj);
+			(bool validForMaintenance, string? errMsj) = await ValidateParkingSpotForMaintenance(spot, jwt);
+			if (!validForMaintenance) return new ApiResponse(StatusCodes.Status400BadRequest, errMsj);
 
 			spot.Status = nameof(SpotStatus.Maintenance);
 			await dbContext.SaveChangesAsync();
@@ -50,7 +50,7 @@ namespace ParkeoApp.Application.Services.ParkingSpotService
 			ParkingSpot? spot = await LoadData(tokenPayload.Tenant).FirstOrDefaultAsync(e => e.ParkingSpotId.Equals(uid));
 			if (spot is null) return new ApiResponse(StatusCodes.Status400BadRequest);
 
-			if(!spot.Status.Equals(nameof(SpotStatus.Maintenance))) return new ApiResponse(StatusCodes.Status400BadRequest, message:"The parking spot is not under maintenance.");
+			if (!spot.Status.Equals(nameof(SpotStatus.Maintenance))) return new ApiResponse(StatusCodes.Status400BadRequest, message: "The parking spot is not under maintenance.");
 
 			spot.Status = nameof(SpotStatus.Available);
 			await dbContext.SaveChangesAsync();
@@ -109,7 +109,12 @@ namespace ParkeoApp.Application.Services.ParkingSpotService
 			TokenPayload tokenPayload = Utils.DecodeJwt(jwt);
 			ParkingSpot? data = await LoadData(tokenPayload.Tenant).FirstOrDefaultAsync(e => e.ParkingSpotId.Equals(uid));
 			if (data is null) return new ApiResponse(StatusCodes.Status400BadRequest);
+
+			if (data.Reservations.Any(reservation => reservation.Status.Equals(nameof(ReservationStatus.Active)) || reservation.Status.Equals(nameof(ReservationStatus.Reserved))))
+				return new ApiResponse(StatusCodes.Status400BadRequest, message: "The spot cannot be deleted because it contains active reservations. Please clear or cancel all reservations before proceeding.");
+
 			data.DeletedAt = DateTime.UtcNow;
+			await dbContext.SaveChangesAsync();
 			return new ApiResponse(StatusCodes.Status204NoContent);
 		}
 	}

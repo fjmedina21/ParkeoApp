@@ -60,6 +60,7 @@ namespace ParkeoApp.Application.Services.UserService
 			User? data = await LoadData(tokenPayload.Tenant).FirstOrDefaultAsync(e => e.UserId.Equals(uid));
 			if (data is null) return new ApiResponse(StatusCodes.Status400BadRequest);
 			data.DeletedAt = DateTime.UtcNow;
+			await dbContext.SaveChangesAsync();
 			return new ApiResponse(StatusCodes.Status204NoContent);
 		}
 	}

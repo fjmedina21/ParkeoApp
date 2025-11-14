@@ -11,7 +11,6 @@ namespace ParkeoApp.Application.Services.ReservationService
 		Task<ApiResponse<GetReservation>> CheckOutAsync(string reservationCode, string jwt);
 		Task<ApiResponse<GetReservation>> CancelAsync(string reservationCode, string jwt);
 		Task<ApiResponse<GetReservation>> GetByCodeAsync(string reservationCode, string jwt);
-		Task<ApiResponse<GetReservation>> GetByUserAsync(PaginationParams paginationParams,string jwt);
-
+		Task<ApiResponse<GetReservation>> GetByUserAsync(PaginationParams paginationParams, string jwt);
 	}
 }
