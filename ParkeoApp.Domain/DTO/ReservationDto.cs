@@ -15,7 +15,7 @@ namespace ParkeoApp.Domain.DTO
 	}
 
 	public record AddReservation(
-		Guid SpotId,
+		Guid ParkingSpotId,
 		DateTime StartAt,
 		DateTime EndAt
 	);

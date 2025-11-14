@@ -2,7 +2,7 @@
 
 public partial class ParkingSpot
 {
-    public Guid SpotId { get; set; }
+    public Guid ParkingSpotId { get; set; }
 
     public Guid TenantId { get; set; }
 

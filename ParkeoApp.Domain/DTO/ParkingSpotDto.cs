@@ -2,7 +2,7 @@ namespace ParkeoApp.Domain.DTO
 {
 	public class GetParkingSpot
 	{
-		public Guid SpotId { get; init; }
+		public Guid ParkingSpotId { get; init; }
 		public string Code { get; init; } = null!;
 		public string SpotType { get; init; } = null!;
 		public string Status { get; init; } = null!;
@@ -12,7 +12,7 @@ namespace ParkeoApp.Domain.DTO
 
 	public class GetParkingSpotWnRef
 	{
-		public Guid SpotId { get; init; }
+		public Guid ParkingSpotId { get; init; }
 		public string Code { get; init; } = null!;
 		public string SpotType { get; init; } = null!;
 		public string Status { get; init; } = null!;

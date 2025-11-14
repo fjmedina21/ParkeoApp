@@ -130,7 +130,7 @@ CREATE TABLE parking_lots
 -- ==============================
 CREATE TABLE parking_spots
 (
-    spot_id        UUID PRIMARY KEY                  DEFAULT uuid_generate_v4(),
+    parking_spot_id        UUID PRIMARY KEY                  DEFAULT uuid_generate_v4(),
     --tenant_id      UUID                     NOT NULL REFERENCES tenants (tenant_id) ON DELETE CASCADE,
     parking_lot_id UUID                     NOT NULL REFERENCES parking_lots (parking_lot_id) ON DELETE CASCADE,
     code           VARCHAR(50)              NOT NULL,
@@ -151,7 +151,7 @@ CREATE TABLE reservations
     reservation_id UUID PRIMARY KEY                  DEFAULT uuid_generate_v4(),
     --tenant_id      UUID                     NOT NULL REFERENCES tenants (tenant_id) ON DELETE CASCADE,
     user_id        UUID                     NOT NULL REFERENCES users (user_id) ON DELETE CASCADE,
-    spot_id        UUID                     NOT NULL REFERENCES parking_spots (spot_id) ON DELETE CASCADE,
+    parking_spot_id        UUID                     NOT NULL REFERENCES parking_spots (parking_spot_id) ON DELETE CASCADE,
     code           VARCHAR(100)             NOT NULL,
     total_cost      NUMERIC(12, 2)           NOT NULL DEFAULT 0,
     start_at       TIMESTAMP WITH TIME ZONE NOT NULL,

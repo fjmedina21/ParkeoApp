@@ -8,7 +8,7 @@ public partial class Reservation
 
     public Guid UserId { get; set; }
 
-    public Guid SpotId { get; set; }
+    public Guid ParkingSpotId { get; set; }
 
     public string Code { get; set; } = null!;
 
@@ -26,9 +26,9 @@ public partial class Reservation
 
     public decimal TotalCost { get; set; }
 
-    public virtual ICollection<Payment> Payments { get; set; } = new List<Payment>();
+    public virtual ParkingSpot ParkingSpot { get; set; } = null!;
 
-    public virtual ParkingSpot Spot { get; set; } = null!;
+    public virtual ICollection<Payment> Payments { get; set; } = new List<Payment>();
 
     public virtual Tenant Tenant { get; set; } = null!;
 

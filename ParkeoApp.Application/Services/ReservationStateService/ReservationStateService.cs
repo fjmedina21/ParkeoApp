@@ -14,7 +14,7 @@ namespace ParkeoApp.Application.Services.ReservationStateService
 				return (false, $"Invalid state transition. Current status: {reservation.Status}, attempted new status: {newStatus}");
 
 			reservation.Status = newStatus.ToString();
-			reservation.Spot.Status = MapSpotStatus(newStatus).ToString();
+			reservation.ParkingSpot.Status = MapSpotStatus(newStatus).ToString();
 			await dbContext.SaveChangesAsync();
 
 			(string action, string subject) = GetNotificationForTransition(newStatus);

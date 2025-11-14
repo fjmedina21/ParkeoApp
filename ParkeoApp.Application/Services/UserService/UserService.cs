@@ -17,7 +17,7 @@ namespace ParkeoApp.Application.Services.UserService
 			.Include(e => e.UserRoles.OrderByDescending(e=>e.AssignedAt))
 			.Include(e => e.UsersTokens.OrderByDescending(e=>e.CreatedAt))
 			.Include(e => e.Reservations.OrderByDescending(e=>e.CreatedAt))
-				.ThenInclude(e=> e.Spot).ThenInclude(e=> e.ParkingLot)
+				.ThenInclude(e=> e.ParkingSpot).ThenInclude(e=> e.ParkingLot)
 			.OrderByDescending(e => e.UpdatedAt).ThenByDescending(e => e.CreatedAt)
 			.AsQueryable();
 

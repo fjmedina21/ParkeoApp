@@ -81,15 +81,15 @@ public partial class ParkeoAppContext : DbContext
 
         modelBuilder.Entity<ParkingSpot>(entity =>
         {
-            entity.HasKey(e => e.SpotId).HasName("parking_spots_pkey");
+            entity.HasKey(e => e.ParkingSpotId).HasName("parking_spots_pkey");
 
             entity.ToTable("parking_spots");
 
             entity.HasIndex(e => new { e.ParkingLotId, e.Code }, "ux_spots_lot_code").IsUnique();
 
-            entity.Property(e => e.SpotId)
+            entity.Property(e => e.ParkingSpotId)
                 .HasDefaultValueSql("uuid_generate_v4()")
-                .HasColumnName("spot_id");
+                .HasColumnName("parking_spot_id");
             entity.Property(e => e.Code)
                 .HasMaxLength(50)
                 .HasColumnName("code");
@@ -218,7 +218,7 @@ public partial class ParkeoAppContext : DbContext
             entity.Property(e => e.EndAt)
                 .HasColumnType("timestamp without time zone")
                 .HasColumnName("end_at");
-            entity.Property(e => e.SpotId).HasColumnName("spot_id");
+            entity.Property(e => e.ParkingSpotId).HasColumnName("parking_spot_id");
             entity.Property(e => e.StartAt)
                 .HasColumnType("timestamp without time zone")
                 .HasColumnName("start_at");
@@ -235,8 +235,8 @@ public partial class ParkeoAppContext : DbContext
                 .HasColumnName("updated_at");
             entity.Property(e => e.UserId).HasColumnName("user_id");
 
-            entity.HasOne(d => d.Spot).WithMany(p => p.Reservations)
-                .HasForeignKey(d => d.SpotId)
+            entity.HasOne(d => d.ParkingSpot).WithMany(p => p.Reservations)
+                .HasForeignKey(d => d.ParkingSpotId)
                 .OnDelete(DeleteBehavior.SetNull)
                 .HasConstraintName("reservations_spot_id_fkey");
 

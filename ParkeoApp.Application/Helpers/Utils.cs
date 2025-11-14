@@ -140,16 +140,16 @@ namespace ParkeoApp.Application.Helpers
 			                <b>Hora Inicio:</b> {reservation.StartAt:hh:mm tt}<br/>
 			                <b>Hora Fin:</b> {reservation.EndAt:hh:mm tt}<br/>
 			                <b>Costo:</b> {reservation.TotalCost}<br/>
-			                <b>Tipo de espacio:</b> {reservation.Spot.SpotType}<br/>
-			                <b>Piso:</b> {reservation.Spot.Floor}<br/>
-			                <b>Parqueo:</b> {reservation.Spot.ParkingLot.Name}<br/>
-			                <b>Dirección:</b> {reservation.Spot.ParkingLot.Address}<br/>
-			                <b>Descripción:</b> {reservation.Spot.ParkingLot.Description}
+			                <b>Tipo de espacio:</b> {reservation.ParkingSpot.SpotType}<br/>
+			                <b>Piso:</b> {reservation.ParkingSpot.Floor}<br/>
+			                <b>Parqueo:</b> {reservation.ParkingSpot.ParkingLot.Name}<br/>
+			                <b>Dirección:</b> {reservation.ParkingSpot.ParkingLot.Address}<br/>
+			                <b>Descripción:</b> {reservation.ParkingSpot.ParkingLot.Description}
 			                """;
 
 			DateTime now = DateTime.Now;
 			string templatePath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "reservation-email-template.html");
-			string htmlFile = File.ReadAllText(templatePath);
+			string htmlFile = await File.ReadAllTextAsync(templatePath);
 			string htmlBody = htmlFile
 				.Replace("{{subject}}", subject)
 				.Replace("{{user}}", $"{reservation.User.FirstName} {reservation.User.LastName}")

@@ -32,7 +32,7 @@ namespace ParkeoApp.Application.Services.ParkingSpotService
 		public async Task<ApiResponse> MarkSpotAsMaintenanceAsync(Guid uid, string jwt)
 		{
 			TokenPayload tokenPayload = Utils.DecodeJwt(jwt);
-			ParkingSpot? spot = await LoadData(tokenPayload.Tenant).FirstOrDefaultAsync(e => e.SpotId.Equals(uid));
+			ParkingSpot? spot = await LoadData(tokenPayload.Tenant).FirstOrDefaultAsync(e => e.ParkingSpotId.Equals(uid));
 			if (spot is null) return new ApiResponse(StatusCodes.Status400BadRequest);
 
 			(bool validForMaintenance, string? errMsj) =await ValidateParkingSpotForMaintenance(spot, jwt);
@@ -47,7 +47,7 @@ namespace ParkeoApp.Application.Services.ParkingSpotService
 		public async Task<ApiResponse> MarkSpotAsAvailableAsync(Guid uid, string jwt)
 		{
 			TokenPayload tokenPayload = Utils.DecodeJwt(jwt);
-			ParkingSpot? spot = await LoadData(tokenPayload.Tenant).FirstOrDefaultAsync(e => e.SpotId.Equals(uid));
+			ParkingSpot? spot = await LoadData(tokenPayload.Tenant).FirstOrDefaultAsync(e => e.ParkingSpotId.Equals(uid));
 			if (spot is null) return new ApiResponse(StatusCodes.Status400BadRequest);
 
 			if(!spot.Status.Equals(nameof(SpotStatus.Maintenance))) return new ApiResponse(StatusCodes.Status400BadRequest, message:"The parking spot is not under maintenance.");
@@ -71,7 +71,7 @@ namespace ParkeoApp.Application.Services.ParkingSpotService
 				{
 					// Asegura que no haya reservas activas o en curso
 					bool hasActiveReservations = await LoadData(Utils.DecodeJwt(jwt).Tenant).AnyAsync(r =>
-						r.SpotId == spot.SpotId && (r.Status == nameof(ReservationStatus.Reserved) || r.Status == nameof(ReservationStatus.Active)));
+						r.ParkingSpotId == spot.ParkingSpotId && (r.Status == nameof(ReservationStatus.Reserved) || r.Status == nameof(ReservationStatus.Active)));
 
 					return (!hasActiveReservations) ? (true, null) : (false, "The parking spot has active or pending reservations and cannot be set to maintenance.");
 				}
@@ -83,7 +83,7 @@ namespace ParkeoApp.Application.Services.ParkingSpotService
 		public async Task<ApiResponse<GetParkingSpotWnRef>> GetByIdAsync(Guid uid, string jwt)
 		{
 			TokenPayload tokenPayload = Utils.DecodeJwt(jwt);
-			ParkingSpot? data = await LoadData(tokenPayload.Tenant).FirstOrDefaultAsync(e => e.SpotId.Equals(uid));
+			ParkingSpot? data = await LoadData(tokenPayload.Tenant).FirstOrDefaultAsync(e => e.ParkingSpotId.Equals(uid));
 			if (data is null) return new ApiResponse<GetParkingSpotWnRef>(StatusCodes.Status400BadRequest);
 			GetParkingSpotWnRef? dto = mapper.Map<GetParkingSpotWnRef>(data);
 			return new ApiResponse<GetParkingSpotWnRef>(data: [dto]);
@@ -107,7 +107,7 @@ namespace ParkeoApp.Application.Services.ParkingSpotService
 		public async Task<ApiResponse> DeleteAsync(Guid uid, string jwt)
 		{
 			TokenPayload tokenPayload = Utils.DecodeJwt(jwt);
-			ParkingSpot? data = await LoadData(tokenPayload.Tenant).FirstOrDefaultAsync(e => e.SpotId.Equals(uid));
+			ParkingSpot? data = await LoadData(tokenPayload.Tenant).FirstOrDefaultAsync(e => e.ParkingSpotId.Equals(uid));
 			if (data is null) return new ApiResponse(StatusCodes.Status400BadRequest);
 			data.DeletedAt = DateTime.UtcNow;
 			return new ApiResponse(StatusCodes.Status204NoContent);

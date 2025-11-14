@@ -19,7 +19,7 @@ namespace ParkeoApp.Application.Services.ReservationService
 			.Where(e => !e.DeletedAt.HasValue && e.TenantId.Equals(tenantId))
 			.Include(e => e.Payments.OrderByDescending(e => e.CreatedAt))
 			.Include(e => e.User)
-			.Include(e => e.Spot).ThenInclude(e => e.ParkingLot)
+			.Include(e => e.ParkingSpot).ThenInclude(e => e.ParkingLot)
 			.OrderByDescending(e => e.UpdatedAt).ThenByDescending(e => e.CreatedAt)
 			.AsQueryable();
 
@@ -33,7 +33,7 @@ namespace ParkeoApp.Application.Services.ReservationService
 
 			ParkingSpot? spot = await dbContext.ParkingSpots.Include(e => e.ParkingLot)
 				.Where(e => !e.DeletedAt.HasValue && e.TenantId.Equals(Utils.DecodeJwt(jwt).Tenant))
-				.FirstOrDefaultAsync(e => e.SpotId.Equals(reservation.SpotId));
+				.FirstOrDefaultAsync(e => e.ParkingSpotId.Equals(reservation.ParkingSpotId));
 
 			decimal hourRate = spot!.ParkingLot.HourlyRate;
 			TimeSpan duration = newReservation.EndAt - newReservation.StartAt;
@@ -41,7 +41,7 @@ namespace ParkeoApp.Application.Services.ReservationService
 
 			newReservation.TenantId = tokenPayload.Tenant;
 			newReservation.UserId = tokenPayload.User;
-			newReservation.SpotId = reservation.SpotId;
+			newReservation.ParkingSpotId = reservation.ParkingSpotId;
 			newReservation.TotalCost = hourRate * totalHours;
 
 			Random rnd = new();
@@ -118,20 +118,20 @@ namespace ParkeoApp.Application.Services.ReservationService
 		private async Task<(bool isValid, string? message)> CheckReservationAvailabilityAsync(Reservation reservation, string jwt)
 		{
 			// 1. Validar fechas
-			if (reservation.StartAt <= DateTime.UtcNow.ToLocalTime()) return (false, "The start date cannot be in the past.");
+			if (reservation.StartAt <= DateTime.Now) return (false, "The start date cannot be in the past.");
 			if (reservation.EndAt <= reservation.StartAt) return (false, "The end date cannot be before the start date.");
 
 			// 2. Validar disponibilidad del espacio
 			ParkingSpot? spot = await dbContext.ParkingSpots
 				.Where(e => !e.DeletedAt.HasValue && e.TenantId.Equals(Utils.DecodeJwt(jwt).Tenant))
-				.FirstOrDefaultAsync(e => e.SpotId == reservation.SpotId);
+				.FirstOrDefaultAsync(e => e.ParkingSpotId == reservation.ParkingSpotId);
 
 			if (spot != null && !spot.Status.Equals(nameof(SpotStatus.Available), StringComparison.CurrentCultureIgnoreCase))
 				return (false, "Spot is not available.");
 
 			// 3. Validar conflicto de horario (interpolación)
 			bool hasConflict = await LoadData(Utils.DecodeJwt(jwt).Tenant).AnyAsync(r =>
-				r.SpotId == reservation.SpotId
+				r.ParkingSpotId == reservation.ParkingSpotId
 			 && r.ReservationId != reservation.ReservationId // evitar compararse con sí misma
 			 && r.Status != nameof(ReservationStatus.Cancelled)
 			 && r.Status != nameof(ReservationStatus.Completed)
