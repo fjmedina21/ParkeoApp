@@ -6,12 +6,12 @@ namespace ParkeoApp.Domain.DTO
 	{
 		public Guid ReservationId { get; init; }
 		public string Code { get; init; } = null!;
-		public decimal TotalCost { get; set; }
+		public decimal TotalCost { get; init; }
 		public DateTime StartAt { get; init; }
 		public DateTime EndAt { get; init; }
 		public string Status { get; init; } = null!;
 		// public virtual ICollection<Payment> Payments { get; set; } = new List<Payment>();
-		public virtual GetParkingSpot Spot { get; init; } = null!;
+		public virtual GetParkingSpot ParkingSpot { get; init; } = null!;
 	}
 
 	public record AddReservation(

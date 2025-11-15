@@ -21,7 +21,7 @@ namespace ParkeoApp.Application.Services.ReservationStateService
 
 			await Utils.SendReservationEmailNotification(
 				reservation!,
-				action.ToLower(),
+				action,
 				subject,
 				configuration
 			);
