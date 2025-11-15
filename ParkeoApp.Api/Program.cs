@@ -13,10 +13,7 @@ builder.Host.UseSerilog((hostBuilderContext, loggerConfig) => loggerConfig.ReadF
 // Add services to the container.
 builder.Services.AddCors(options => options.AddDefaultPolicy(policy => policy.AllowAnyOrigin().AllowAnyHeader().AllowAnyMethod()));
 
-builder.Services.AddControllers().AddJsonOptions(options =>
-{
-	options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles;
-});
+builder.Services.AddControllers().AddJsonOptions(options => { options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles; });
 
 builder.Services.AddAuthentication(option =>
 {
@@ -56,11 +53,12 @@ var app = builder.Build();
 
 // Configure the HTTP request pipeline.
 // if (app.Environment.IsDevelopment()) {
-	app.MapOpenApi();
-	app.UseSwagger();
-	app.UseSwaggerUI();
+app.MapOpenApi();
+app.UseSwagger();
+app.UseSwaggerUI();
 // }
 
+app.UseCors();
 app.UseHttpsRedirection();
 app.UseGlobalErrorHandler();
 app.UseAuthentication();

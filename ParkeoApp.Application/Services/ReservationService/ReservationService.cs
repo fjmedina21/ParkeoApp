@@ -52,7 +52,7 @@ namespace ParkeoApp.Application.Services.ReservationService
 
 			Reservation? createdReservation = await LoadData(tokenPayload.Tenant).FirstOrDefaultAsync(e => e.ReservationId.Equals(entry.Entity.ReservationId));
 			await Utils.SendReservationEmailNotification(createdReservation!,
-				"Reserved",
+				"Reservation",
 				"ParkeoApp: Reservation Confirmed",
 				configuration);
 

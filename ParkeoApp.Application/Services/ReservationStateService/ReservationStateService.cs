@@ -58,10 +58,10 @@ namespace ParkeoApp.Application.Services.ReservationStateService
 		{
 			return status switch
 			{
-				ReservationStatus.Active => ("Checked In", "ParkeoApp: Checked In Reservation"),
-				ReservationStatus.Completed => ("Checked Out", "ParkeoApp: Checked Out Reservation"),
-				ReservationStatus.Cancelled => ("Cancelled", "ParkeoApp: Cancelled Reservation"),
-				_ => ("Modified", "ParkeoApp: Modified Reservation")
+				ReservationStatus.Active => ("Check In", "ParkeoApp: Checked In Reservation"),
+				ReservationStatus.Completed => ("Check Out", "ParkeoApp: Checked Out Reservation"),
+				ReservationStatus.Cancelled => ("Cancellation", "ParkeoApp: Cancelled Reservation"),
+				_ => ("Modification", "ParkeoApp: Modified Reservation")
 			};
 		}
 	}
