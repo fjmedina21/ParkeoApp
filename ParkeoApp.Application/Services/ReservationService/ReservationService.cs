@@ -116,8 +116,11 @@ namespace ParkeoApp.Application.Services.ReservationService
 
 		private async Task<(bool isValid, string? message)> CheckReservationAvailabilityAsync(Reservation reservation, string jwt)
 		{
+			reservation.StartAt = DominicanRepublicTime.ConvertLocalToUtc(reservation.StartAt);
+			reservation.EndAt = DominicanRepublicTime.ConvertLocalToUtc(reservation.EndAt);
+
 			// 1. Validar fechas
-			if (reservation.StartAt <= DateTime.Now) return (false, "The start date cannot be in the past.");
+			if (reservation.StartAt <= DateTime.UtcNow) return (false, "The start date cannot be in the past.");
 			if (reservation.EndAt <= reservation.StartAt) return (false, "The end date cannot be before the start date.");
 
 			// 2. Validar disponibilidad del espacio

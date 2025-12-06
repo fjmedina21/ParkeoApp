@@ -1,6 +1,7 @@
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.EntityFrameworkCore;
+using ParkeoApp.Application.Helpers;
 using Serilog;
 using ParkeoApp.Infrastructure.Data;
 using ParkeoApp.Application.Services.ReservationStateService;
@@ -41,7 +42,7 @@ namespace ParkeoApp.Application.BackgroundJobs
 			IReservationStateService stateService
 		)
 		{
-			DateTime now = DateTime.Now;
+			DateTime now = DateTime.UtcNow;
 
 			var expiredReservations = await dbContext.Reservations
 				.Include(r => r.ParkingSpot).ThenInclude(e=>e.ParkingLot)

@@ -215,13 +215,9 @@ public partial class ParkeoAppContext : DbContext
                 .HasDefaultValueSql("CURRENT_TIMESTAMP")
                 .HasColumnName("created_at");
             entity.Property(e => e.DeletedAt).HasColumnName("deleted_at");
-            entity.Property(e => e.EndAt)
-                .HasColumnType("timestamp without time zone")
-                .HasColumnName("end_at");
+            entity.Property(e => e.EndAt).HasColumnName("end_at");
             entity.Property(e => e.ParkingSpotId).HasColumnName("parking_spot_id");
-            entity.Property(e => e.StartAt)
-                .HasColumnType("timestamp without time zone")
-                .HasColumnName("start_at");
+            entity.Property(e => e.StartAt).HasColumnName("start_at");
             entity.Property(e => e.Status)
                 .HasMaxLength(50)
                 .HasDefaultValueSql("'Reserved'::character varying")

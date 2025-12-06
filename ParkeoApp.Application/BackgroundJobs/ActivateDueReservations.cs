@@ -1,6 +1,7 @@
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.EntityFrameworkCore;
+using ParkeoApp.Application.Helpers;
 using Serilog;
 using ParkeoApp.Infrastructure.Data;
 using ParkeoApp.Application.Services.ReservationStateService;
@@ -41,21 +42,18 @@ namespace ParkeoApp.Application.BackgroundJobs
 			IReservationStateService stateService
 		)
 		{
-			DateTime now = DateTime.Now;
+			DateTime now = DateTime.UtcNow;
 
-			var activeReservations = await dbContext.Reservations
-				.Include(r => r.ParkingSpot).ThenInclude(e=>e.ParkingLot)
+			var reservations = await dbContext.Reservations
+				.Include(r => r.ParkingSpot).ThenInclude(e => e.ParkingLot)
 				.Include(r => r.User)
-
 				.Where(r =>
-					!r.DeletedAt.HasValue &&
-					r.StartAt <= now &&
-					r.Status == nameof(ReservationStatus.Reserved)
+					!r.DeletedAt.HasValue && r.StartAt <= now && r.Status == nameof(ReservationStatus.Reserved)
 				).ToListAsync();
 
-			if (!activeReservations.Any()) return;
+			if (!reservations.Any()) return;
 
-			foreach (Reservation reservation in activeReservations)
+			foreach (Reservation reservation in reservations)
 			{
 				try
 				{

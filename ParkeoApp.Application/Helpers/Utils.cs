@@ -134,11 +134,14 @@ namespace ParkeoApp.Application.Helpers
 
 		public async static Task SendReservationEmailNotification(Reservation reservation, string subject, IConfiguration configuration)
 		{
+			DateTime startAt = DominicanRepublicTime.ConvertUtcToLocal(reservation.StartAt);
+			DateTime endAt   = DominicanRepublicTime.ConvertUtcToLocal(reservation.EndAt);
+
 			var details = $"""
 			                <b>Código:</b> {reservation.Code}<br/>
-			                <b>Fecha:</b> {reservation.StartAt.ToLongDateString()}<br/>
-			                <b>Hora Inicio:</b> {reservation.StartAt:hh:mm tt}<br/>
-			                <b>Hora Fin:</b> {reservation.EndAt:hh:mm tt}<br/>
+			                <b>Fecha:</b> {startAt.ToLongDateString()}<br/>
+			                <b>Hora Inicio:</b> {startAt:hh:mm tt}<br/>
+			                <b>Hora Fin:</b> {endAt:hh:mm tt}<br/>
 			                <b>Total:</b> {reservation.TotalCost:C}<br/>
 			                <h3>Información del Parqueo:</h3>
 			                <b>Nombre:</b> {reservation.ParkingSpot.ParkingLot.Name}<br/>

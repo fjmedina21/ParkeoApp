@@ -1,4 +1,5 @@
 using AutoMapper;
+using ParkeoApp.Application.Helpers;
 using ParkeoApp.Domain.DTO;
 using ParkeoApp.Domain.Entities;
 
@@ -15,7 +16,10 @@ namespace ParkeoApp.Application
 			CreateMap<Tenant, GetTenant>();
 			CreateMap<AddTenant, Tenant>();
 
-			CreateMap<Reservation, GetReservation>();
+			CreateMap<Reservation, GetReservation>()
+				.ForMember(dest => dest.StartAt, opt => opt.MapFrom(src => DominicanRepublicTime.ConvertUtcToLocal(src.StartAt)))
+				.ForMember(dest => dest.EndAt, opt => opt.MapFrom(src => DominicanRepublicTime.ConvertUtcToLocal(src.EndAt)))
+				;
 			CreateMap<AddReservation, Reservation>();
 
 			CreateMap<ParkingLot, GetParkingLot>()
