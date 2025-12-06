@@ -52,7 +52,6 @@ namespace ParkeoApp.Application.Services.ReservationService
 
 			Reservation? createdReservation = await LoadData(tokenPayload.Tenant).FirstOrDefaultAsync(e => e.ReservationId.Equals(entry.Entity.ReservationId));
 			await Utils.SendReservationEmailNotification(createdReservation!,
-				"Reservation",
 				"ParkeoApp: Reservation Confirmed",
 				configuration);
 
@@ -69,7 +68,7 @@ namespace ParkeoApp.Application.Services.ReservationService
 			(bool validTransition, string? msj) = await stateService.ReservationStateTransition(dbContext, entity, ReservationStatus.Completed);
 			return !validTransition
 				? new ApiResponse<GetReservation>(statusCode: StatusCodes.Status400BadRequest, message: msj)
-				: new ApiResponse<GetReservation>(statusCode: StatusCodes.Status200OK, message: "Reservation Checked Out.");
+				: new ApiResponse<GetReservation>(statusCode: StatusCodes.Status200OK, message: "Reservation completed.");
 		}
 
 		public async Task<ApiResponse<GetReservation>> CheckInAsync(string reservationCode, string jwt)
@@ -81,7 +80,7 @@ namespace ParkeoApp.Application.Services.ReservationService
 			(bool validTransition, string? msj) = await stateService.ReservationStateTransition(dbContext, entity, ReservationStatus.Active);
 			return !validTransition
 				? new ApiResponse<GetReservation>(statusCode: StatusCodes.Status400BadRequest, message: msj)
-				: new ApiResponse<GetReservation>(statusCode: StatusCodes.Status200OK, message: "Reservation Checked In.");
+				: new ApiResponse<GetReservation>(statusCode: StatusCodes.Status200OK, message: "Reservation activated.");
 		}
 
 		public async Task<ApiResponse<GetReservation>> CancelAsync(string reservationCode, string jwt)
@@ -93,7 +92,7 @@ namespace ParkeoApp.Application.Services.ReservationService
 			(bool validTransition, string? msj) = await stateService.ReservationStateTransition(dbContext, entity, ReservationStatus.Cancelled);
 			return !validTransition
 				? new ApiResponse<GetReservation>(statusCode: StatusCodes.Status400BadRequest, message: msj)
-				: new ApiResponse<GetReservation>(statusCode: StatusCodes.Status200OK, message: "Reservation Cancelled.");
+				: new ApiResponse<GetReservation>(statusCode: StatusCodes.Status200OK, message: "Reservation cancelled.");
 		}
 
 		public async Task<ApiResponse<GetReservation>> GetByCodeAsync(string reservationCode, string jwt)

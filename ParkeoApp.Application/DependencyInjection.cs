@@ -2,6 +2,7 @@
 using ParkeoApp.Infrastructure;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using ParkeoApp.Application.BackgroundJobs;
 using ParkeoApp.Application.Middlewares;
 using ParkeoApp.Application.Services.AuthService;
 using ParkeoApp.Application.Services.ParkingLotService;
@@ -18,6 +19,9 @@ namespace ParkeoApp.Application
 	{
 		public static IServiceCollection AddApplication(this IServiceCollection services, IConfiguration configuration)
 		{
+
+			services.AddHostedService<ActivateDueReservations>();
+			services.AddHostedService<ReleaseExpiredParkingSpots>();
 
 			services.AddAutoMapper(cfg =>
 			{

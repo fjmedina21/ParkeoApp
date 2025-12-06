@@ -17,11 +17,10 @@ namespace ParkeoApp.Application.Services.ReservationStateService
 			reservation.ParkingSpot.Status = MapSpotStatus(newStatus).ToString();
 			await dbContext.SaveChangesAsync();
 
-			(string action, string subject) = GetNotificationForTransition(newStatus);
+			string subject = GetNotificationForTransition(newStatus);
 
 			await Utils.SendReservationEmailNotification(
 				reservation!,
-				action,
 				subject,
 				configuration
 			);
@@ -54,14 +53,14 @@ namespace ParkeoApp.Application.Services.ReservationStateService
 				_ => SpotStatus.Available
 			};
 		}
-		private static (string action, string subject) GetNotificationForTransition(ReservationStatus status)
+		private static string GetNotificationForTransition(ReservationStatus status)
 		{
 			return status switch
 			{
-				ReservationStatus.Active => ("Check In", "ParkeoApp: Checked In Reservation"),
-				ReservationStatus.Completed => ("Check Out", "ParkeoApp: Checked Out Reservation"),
-				ReservationStatus.Cancelled => ("Cancellation", "ParkeoApp: Cancelled Reservation"),
-				_ => ("Modification", "ParkeoApp: Modified Reservation")
+				ReservationStatus.Active => "ParkeoApp: Reservation Activated",
+				ReservationStatus.Completed => "ParkeoApp: Reservation Completed",
+				ReservationStatus.Cancelled => "ParkeoApp: Reservation Cancelled",
+				_ => "ParkeoApp: Reservation Updated"
 			};
 		}
 	}

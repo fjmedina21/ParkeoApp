@@ -132,10 +132,9 @@ namespace ParkeoApp.Application.Helpers
 
 		#endregion
 
-		public async static Task SendReservationEmailNotification(Reservation reservation, string action, string subject, IConfiguration configuration)
+		public async static Task SendReservationEmailNotification(Reservation reservation, string subject, IConfiguration configuration)
 		{
 			var details = $"""
-			                <b>Acción:</b> {action}<br/>
 			                <b>Código:</b> {reservation.Code}<br/>
 			                <b>Fecha:</b> {reservation.StartAt.ToLongDateString()}<br/>
 			                <b>Hora Inicio:</b> {reservation.StartAt:hh:mm tt}<br/>
