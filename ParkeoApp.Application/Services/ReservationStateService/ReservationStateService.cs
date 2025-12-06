@@ -51,7 +51,6 @@ namespace ParkeoApp.Application.Services.ReservationStateService
 				ReservationStatus.Completed => SpotStatus.Available,
 				ReservationStatus.Cancelled => SpotStatus.Available,
 				ReservationStatus.Active => SpotStatus.Occupied,
-				ReservationStatus.Reserved => SpotStatus.Occupied,
 				_ => SpotStatus.Available
 			};
 		}
