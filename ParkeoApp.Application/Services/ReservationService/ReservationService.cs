@@ -128,8 +128,12 @@ namespace ParkeoApp.Application.Services.ReservationService
 				.Where(e => !e.DeletedAt.HasValue && e.TenantId.Equals(Utils.DecodeJwt(jwt).Tenant))
 				.FirstOrDefaultAsync(e => e.ParkingSpotId == reservation.ParkingSpotId);
 
-			if (spot != null && !spot.Status.Equals(nameof(SpotStatus.Available), StringComparison.CurrentCultureIgnoreCase))
-				return (false, "Spot is not available.");
+			if (reservation.ParkingSpot.Status.Equals("Occupied", StringComparison.OrdinalIgnoreCase)
+			 && reservation.StartAt <= DateTime.UtcNow
+			 && reservation.EndAt > DateTime.UtcNow)
+			{
+				return (false, "Spot is currently in use.");
+			}
 
 			// 3. Validar conflicto de horario (interpolación)
 			bool hasConflict = await LoadData(Utils.DecodeJwt(jwt).Tenant).AnyAsync(r =>
