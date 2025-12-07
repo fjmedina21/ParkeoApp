@@ -128,7 +128,7 @@ namespace ParkeoApp.Application.Services.ReservationService
 				.Where(e => !e.DeletedAt.HasValue && e.TenantId.Equals(Utils.DecodeJwt(jwt).Tenant))
 				.FirstOrDefaultAsync(e => e.ParkingSpotId == reservation.ParkingSpotId);
 
-			if (reservation.ParkingSpot.Status.Equals("Occupied", StringComparison.OrdinalIgnoreCase)
+			if (spot != null && spot.Status.Equals("Occupied", StringComparison.OrdinalIgnoreCase)
 			 && reservation.StartAt <= DateTime.UtcNow
 			 && reservation.EndAt > DateTime.UtcNow)
 			{
