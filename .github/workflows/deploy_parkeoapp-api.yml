@@ -6,7 +6,7 @@ name: Build and deploy ASP.Net Core app to Azure Web App - parkeoapp-api
 on:
   push:
     branches:
-      - main
+      - deploy
   workflow_dispatch:
 
 jobs:
@@ -62,4 +62,5 @@ jobs:
           app-name: 'parkeoapp-api'
           slot-name: 'Production'
           package: .
+
           
